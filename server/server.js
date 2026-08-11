@@ -4,6 +4,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware to parse JSON requests
+app.use(express.json());
 
 
 // Sample route
