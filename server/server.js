@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import pool from './db/db.js';
+import accountRoutes from './routes/accountRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -7,8 +9,9 @@ const port = process.env.PORT || 3000;
 // Middleware to parse JSON requests
 app.use(express.json());
 app.use(cors({origin : 'http://localhost:5173'})); // Allow requests from the frontend
+app.use('/api/accounts', accountRoutes); // Use account routes
 
-// Sample route
+
 app.get('/', (req, res) => {
   res.send('FinTrack API is running');
 });
@@ -18,6 +21,24 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     message: 'FinTrack API is running'
   });
+});
+
+app.get('/api/db-test', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+
+    res.json({
+      status: 'ok',
+      databaseTime: result.rows[0].now
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      status: 'error',
+      message: 'Database connection failed'
+    });
+  }
 });
 
 // Start the server
