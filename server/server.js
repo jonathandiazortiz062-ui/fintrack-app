@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import pool from './db/db.js';
 import accountRoutes from './routes/accountRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import transactionRoutes from './routes/transactionRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,6 +12,8 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors({origin : 'http://localhost:5173'})); // Allow requests from the frontend
 app.use('/api/accounts', accountRoutes); // Use account routes
+app.use('/api/categories', categoryRoutes); // Use category routes
+app.use('/api/transactions', transactionRoutes); // Use transaction routes
 
 
 app.get('/', (req, res) => {
