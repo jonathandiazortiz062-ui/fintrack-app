@@ -2,28 +2,76 @@ import pool from "../db/db.js";
 
 export const getTransactions = async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT
-         transactions.id,
-         transactions.account_id,
-         transactions.category_id,
-         transactions.description,
-         transactions.amount,
-         transactions.transaction_type,
-         transactions.transaction_date,
-         transactions.created_at,
-         accounts.name AS account_name,
-         categories.name AS category_name
-       FROM transactions
-       JOIN accounts
-         ON transactions.account_id = accounts.id
-       LEFT JOIN categories
-         ON transactions.category_id = categories.id
-       WHERE accounts.user_id = $1
-       ORDER BY transactions.transaction_date DESC,
-                transactions.id DESC`,
-      [1],
-    );
+    const { accountId, categoryId, type, startDate, endDate } = req.query;
+
+    const values = [1];
+
+    let query = `
+      SELECT
+        transactions.id,
+        transactions.account_id,
+        transactions.category_id,
+        transactions.description,
+        transactions.amount,
+        transactions.transaction_type,
+        transactions.transaction_date,
+        transactions.created_at,
+        accounts.name AS account_name,
+        categories.name AS category_name
+      FROM transactions
+      JOIN accounts
+        ON transactions.account_id = accounts.id
+      LEFT JOIN categories
+        ON transactions.category_id = categories.id
+      WHERE accounts.user_id = $1
+    `;
+
+    if (accountId) {
+      values.push(accountId);
+
+      query += `
+        AND transactions.account_id = $${values.length}
+      `;
+    }
+
+    if (categoryId) {
+      values.push(categoryId);
+
+      query += `
+        AND transactions.category_id = $${values.length}
+      `;
+    }
+
+    if (type) {
+      values.push(type);
+
+      query += `
+        AND transactions.transaction_type = $${values.length}
+      `;
+    }
+
+    if (startDate) {
+      values.push(startDate);
+
+      query += `
+        AND transactions.transaction_date >= $${values.length}
+      `;
+    }
+
+    if (endDate) {
+      values.push(endDate);
+
+      query += `
+        AND transactions.transaction_date <= $${values.length}
+      `;
+    }
+
+    query += `
+      ORDER BY transactions.transaction_date DESC,
+               transactions.id DESC
+    `;
+
+    const result = await pool.query(query, values);
 
     res.json(result.rows);
   } catch (error) {
@@ -199,24 +247,23 @@ export const deleteTransaction = async (req, res) => {
          WHERE user_id = $2
        )
        RETURNING *`,
-      [transactionId, 1]
+      [transactionId, 1],
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: 'Transaction not found'
+        message: "Transaction not found",
       });
     }
 
     res.json({
-      message: 'Transaction deleted successfully'
+      message: "Transaction deleted successfully",
     });
-
   } catch (error) {
-    console.error('Error deleting transaction:', error);
+    console.error("Error deleting transaction:", error);
 
     res.status(500).json({
-      message: 'Unable to delete transaction'
+      message: "Unable to delete transaction",
     });
   }
 };

@@ -44,6 +44,13 @@ function Transactions() {
   });
 
   const [editingTransactionId, setEditingTransactionId] = useState(null);
+  const [filters, setFilters] = useState({
+    accountId: "",
+    categoryId: "",
+    type: "",
+    startDate: "",
+    endDate: "",
+  });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -82,6 +89,42 @@ function Transactions() {
 
     setOpen(true);
   };
+
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
+
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleApplyFilters = async () => {
+    try {
+      await fetchTransactions(filters);
+    } catch (error) {
+      console.error("Error filtering transactions:", error);
+      setError("Unable to filter transactions");
+    }
+  };
+  const handleClearFilters = async () => {
+    const clearedFilters = {
+      accountId: "",
+      categoryId: "",
+      type: "",
+      startDate: "",
+      endDate: "",
+    };
+
+    setFilters(clearedFilters);
+
+    try {
+      await fetchTransactions(clearedFilters);
+    } catch (error) {
+      console.error("Error clearing filters:", error);
+    }
+  };
+
   //CRUD:
   const handleCreateTransaction = async () => {
     try {
@@ -186,39 +229,63 @@ function Transactions() {
   };
 
   const handleDeleteTransaction = async (transactionId) => {
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/transactions/${transactionId}`,
-      {
-        method: 'DELETE'
-      }
-    );
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/transactions/${transactionId}`,
+        {
+          method: "DELETE",
+        },
+      );
 
-    if (!response.ok) {
-      throw new Error('Failed to delete transaction');
+      if (!response.ok) {
+        throw new Error("Failed to delete transaction");
+      }
+
+      setTransactions((prev) =>
+        prev.filter((transaction) => transaction.id !== transactionId),
+      );
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+    }
+  };
+
+  const fetchTransactions = async (currentFilters = filters) => {
+    const params = new URLSearchParams();
+
+    if (currentFilters.accountId) {
+      params.append("accountId", currentFilters.accountId);
     }
 
-    setTransactions((prev) =>
-      prev.filter(
-        (transaction) => transaction.id !== transactionId
-      )
-    );
+    if (currentFilters.categoryId) {
+      params.append("categoryId", currentFilters.categoryId);
+    }
 
-  } catch (error) {
-    console.error('Error deleting transaction:', error);
-  }
-};
+    if (currentFilters.type) {
+      params.append("type", currentFilters.type);
+    }
 
-  const fetchTransactions = async () => {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/transactions`,
-    );
+    if (currentFilters.startDate) {
+      params.append("startDate", currentFilters.startDate);
+    }
+
+    if (currentFilters.endDate) {
+      params.append("endDate", currentFilters.endDate);
+    }
+
+    const queryString = params.toString();
+
+    const url = queryString
+      ? `${import.meta.env.VITE_API_URL}/api/transactions?${queryString}`
+      : `${import.meta.env.VITE_API_URL}/api/transactions`;
+
+    const response = await fetch(url);
 
     if (!response.ok) {
       throw new Error("Failed to fetch transactions");
     }
 
     const data = await response.json();
+
     setTransactions(data);
   };
 
@@ -294,6 +361,119 @@ function Transactions() {
           Add Transaction
         </Button>
       </Box>
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Filters
+          </Typography>
+
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField
+                select
+                label="Account"
+                name="accountId"
+                value={filters.accountId}
+                onChange={handleFilterChange}
+                fullWidth
+              >
+                <MenuItem value="">All Accounts</MenuItem>
+
+                {accounts.map((account) => (
+                  <MenuItem key={account.id} value={account.id}>
+                    {account.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField
+                select
+                label="Category"
+                name="categoryId"
+                value={filters.categoryId}
+                onChange={handleFilterChange}
+                fullWidth
+              >
+                <MenuItem value="">All Categories</MenuItem>
+
+                {categories.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField
+                select
+                label="Type"
+                name="type"
+                value={filters.type}
+                onChange={handleFilterChange}
+                fullWidth
+              >
+                <MenuItem value="">All Types</MenuItem>
+
+                <MenuItem value="income">Income</MenuItem>
+
+                <MenuItem value="expense">Expense</MenuItem>
+              </TextField>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField
+                label="Start Date"
+                name="startDate"
+                type="date"
+                value={filters.startDate}
+                onChange={handleFilterChange}
+                fullWidth
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField
+                label="End Date"
+                name="endDate"
+                type="date"
+                value={filters.endDate}
+                onChange={handleFilterChange}
+                fullWidth
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+              />
+            </Grid>
+
+            <Grid
+              size={{ xs: 12, md: 4 }}
+              sx={{
+                display: "flex",
+                gap: 1,
+                alignItems: "center",
+              }}
+            >
+              <Button variant="contained" onClick={handleApplyFilters}>
+                Apply
+              </Button>
+
+              <Button variant="outlined" onClick={handleClearFilters}>
+                Clear
+              </Button>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
       {transactions.length === 0 ? (
         <Card>
