@@ -1,0 +1,180 @@
+import pool from '../db/db.js';
+
+export const getBudgets = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT
+        budgets.id,
+        budgets.user_id,
+        budgets.category_id,
+        categories.name AS category_name,
+        budgets.monthly_limit,
+        budgets.created_at
+      FROM budgets
+      JOIN categories
+        ON budgets.category_id = categories.id
+      WHERE budgets.user_id = $1
+      ORDER BY categories.name`,
+      [1]
+    );
+
+    res.json(result.rows);
+
+  } catch (error) {
+    console.error('Error fetching budgets:', error);
+
+    res.status(500).json({
+      message: 'Unable to retrieve budgets'
+    });
+  }
+};
+
+//CRUD:
+export const createBudget = async (req, res) => {
+  try {
+    const {
+      categoryId,
+      monthlyLimit
+    } = req.body;
+
+    if (!categoryId || !monthlyLimit) {
+      return res.status(400).json({
+        message: 'Category and monthly limit are required'
+      });
+    }
+
+    const categoryCheck = await pool.query(
+      `SELECT id
+       FROM categories
+       WHERE id = $1
+       AND user_id = $2`,
+      [categoryId, 1]
+    );
+
+    if (categoryCheck.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Category not found'
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO budgets (
+        user_id,
+        category_id,
+        monthly_limit
+      )
+      VALUES ($1, $2, $3)
+      RETURNING *`,
+      [
+        1,
+        categoryId,
+        monthlyLimit
+      ]
+    );
+
+    res.status(201).json(result.rows[0]);
+
+  } catch (error) {
+    console.error('Error creating budget:', error);
+
+    res.status(500).json({
+      message: 'Unable to create budget'
+    });
+  }
+};
+
+export const updateBudget = async (req, res) => {
+  try {
+    const budgetId = req.params.id;
+
+    const {
+      categoryId,
+      monthlyLimit
+    } = req.body;
+
+    if (!categoryId || !monthlyLimit) {
+      return res.status(400).json({
+        message: 'Category and monthly limit are required'
+      });
+    }
+
+    const categoryCheck = await pool.query(
+      `SELECT id
+       FROM categories
+       WHERE id = $1
+       AND user_id = $2`,
+      [categoryId, 1]
+    );
+
+    if (categoryCheck.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Category not found'
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE budgets
+       SET
+         category_id = $1,
+         monthly_limit = $2
+       WHERE id = $3
+       AND user_id = $4
+       RETURNING *`,
+      [
+        categoryId,
+        monthlyLimit,
+        budgetId,
+        1
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Budget not found'
+      });
+    }
+
+    res.json(result.rows[0]);
+
+  } catch (error) {
+    console.error('Error updating budget:', error);
+
+    res.status(500).json({
+      message: 'Unable to update budget'
+    });
+  }
+};
+
+export const deleteBudget = async (req, res) => {
+  try {
+    const budgetId = req.params.id;
+
+    const result = await pool.query(
+      `DELETE FROM budgets
+       WHERE id = $1
+       AND user_id = $2
+       RETURNING *`,
+      [
+        budgetId,
+        1
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Budget not found'
+      });
+    }
+
+    res.json({
+      message: 'Budget deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Error deleting budget:', error);
+
+    res.status(500).json({
+      message: 'Unable to delete budget'
+    });
+  }
+};
