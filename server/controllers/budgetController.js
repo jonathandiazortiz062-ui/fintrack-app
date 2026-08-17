@@ -9,11 +9,43 @@ export const getBudgets = async (req, res) => {
         budgets.category_id,
         categories.name AS category_name,
         budgets.monthly_limit,
-        budgets.created_at
+        budgets.created_at,
+
+        COALESCE(
+          SUM(
+            CASE
+              WHEN transactions.transaction_type = 'expense'
+              AND DATE_TRUNC('month', transactions.transaction_date)
+                  = DATE_TRUNC('month', CURRENT_DATE)
+              THEN transactions.amount
+              ELSE 0
+            END
+          ),
+          0
+        ) AS amount_spent
+
       FROM budgets
+
       JOIN categories
         ON budgets.category_id = categories.id
+
+      LEFT JOIN transactions
+        ON transactions.category_id = budgets.category_id
+
+      LEFT JOIN accounts
+        ON transactions.account_id = accounts.id
+        AND accounts.user_id = budgets.user_id
+
       WHERE budgets.user_id = $1
+
+      GROUP BY
+        budgets.id,
+        budgets.user_id,
+        budgets.category_id,
+        categories.name,
+        budgets.monthly_limit,
+        budgets.created_at
+
       ORDER BY categories.name`,
       [1]
     );

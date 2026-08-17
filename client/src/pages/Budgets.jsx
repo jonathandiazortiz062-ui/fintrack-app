@@ -7,10 +7,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
+  LinearProgress,
   MenuItem,
   TextField,
   Typography,
-  IconButton,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -271,47 +272,78 @@ function Budgets() {
             gap: 3,
           }}
         >
-          {budgets.map((budget) => (
-            <Card key={budget.id}>
-              <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <Box>
-                    <Typography variant="h6">{budget.category_name}</Typography>
+          {budgets.map((budget) => {
+            const limit = Number(budget.monthly_limit);
+            const spent = Number(budget.amount_spent);
 
-                    <Typography color="text.secondary">
-                      Monthly Budget
-                    </Typography>
+            const percentage = limit > 0 ? (spent / limit) * 100 : 0;
+            const isOverBudget = spent > limit;
+
+            return (
+              <Card key={budget.id}>
+                <CardContent>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="h6">
+                        {budget.category_name}
+                      </Typography>
+
+                      <Typography color="text.secondary">
+                        Monthly Budget
+                      </Typography>
+                    </Box>
+
+                    <Box>
+                      <IconButton
+                        onClick={() => handleEditBudget(budget)}
+                        aria-label="edit budget"
+                      >
+                        <EditIcon />
+                      </IconButton>
+
+                      <IconButton
+                        onClick={() => handleDeleteBudget(budget.id)}
+                        aria-label="delete budget"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
                   </Box>
 
-                  <Box>
-                    <IconButton
-                      onClick={() => handleEditBudget(budget)}
-                      aria-label="edit budget"
-                    >
-                      <EditIcon />
-                    </IconButton>
-
-                    <IconButton
-                      onClick={() => handleDeleteBudget(budget.id)}
-                      aria-label="delete budget"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                </Box>
-
-                <Typography variant="h5" sx={{ mt: 2 }}>
-                  ${Number(budget.monthly_limit).toFixed(2)}
-                </Typography>
-              </CardContent>
-            </Card>
-          ))}
+                  <Typography variant="h5" sx={{ mt: 2 }}>
+                    ${Number(budget.monthly_limit).toFixed(2)}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 2 }}
+                  >
+                    ${spent.toFixed(2)} spent of ${limit.toFixed(2)}
+                  </Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={Math.min(percentage, 100)}
+                    sx={{ mt: 1 }}
+                    color={percentage >= 75 && percentage < 100 ? "warning" : isOverBudget ? "error" : "primary"}
+                  />
+                  <Typography
+                    variant="body2"
+                    color={isOverBudget ? "error" : "text.secondary"}
+                    sx={{ mt: 0.5 }}
+                  >
+                    {percentage.toFixed(1)}%
+                    {isOverBudget && " - Over Budget"}
+                  </Typography>
+                </CardContent>
+              </Card>
+            );
+          })}
         </Box>
       )}
       <Dialog

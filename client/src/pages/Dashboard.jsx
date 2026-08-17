@@ -3,17 +3,47 @@ import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 
 function Dashboard() {
   const [apiStatus, setApiStatus] = useState("Checking API...");
+  const [summary, setSummary] = useState({
+    totalBalance: 0,
+    monthlyIncome: 0,
+    monthlyExpenses: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/health`)
-      .then((response) => response.json())
-      .then((data) => {
-        setApiStatus(data.message);
-      })
-      .catch((error) => {
-        console.error("Error connecting to API:", error);
-        setApiStatus("Unable to connect to API");
-      });
+    const fetchSummary = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/dashboard/summary`,
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard summary");
+        }
+
+        const data = await response.json();
+
+        setSummary(data);
+      } catch (error) {
+        console.error("Error loading dashboard summary:", error);
+        setError("Unable to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSummary();
   }, []);
+
+  if (loading) {
+    return <Typography>Loading dashboard...</Typography>;
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
 
   return (
     <Box>
@@ -31,7 +61,9 @@ function Dashboard() {
             <CardContent>
               <Typography color="text.secondary">Balance</Typography>
 
-              <Typography variant="h5">$0.00</Typography>
+              <Typography variant="h5">
+                ${Number(summary.totalBalance).toFixed(2)}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -41,7 +73,9 @@ function Dashboard() {
             <CardContent>
               <Typography color="text.secondary">Income</Typography>
 
-              <Typography variant="h5">$0.00</Typography>
+              <Typography variant="h5">
+                ${Number(summary.monthlyIncome).toFixed(2)}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -51,7 +85,9 @@ function Dashboard() {
             <CardContent>
               <Typography color="text.secondary">Expenses</Typography>
 
-              <Typography variant="h5">$0.00</Typography>
+              <Typography variant="h5">
+                ${Number(summary.monthlyExpenses).toFixed(2)}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>

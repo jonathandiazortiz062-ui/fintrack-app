@@ -5,6 +5,7 @@ import accountRoutes from './routes/accountRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
 import budgetRoutes from './routes/budgetRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -16,6 +17,7 @@ app.use('/api/accounts', accountRoutes); // Use account routes
 app.use('/api/categories', categoryRoutes); // Use category routes
 app.use('/api/transactions', transactionRoutes); // Use transaction routes
 app.use('/api/budgets', budgetRoutes); // Use budget routes
+app.use('/api/dashboard', dashboardRoutes); // Use dashboard routes
 
 
 app.get('/', (req, res) => {
