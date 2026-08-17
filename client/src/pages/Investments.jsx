@@ -211,6 +211,23 @@ function Investments() {
     return <Typography color="error">{error}</Typography>;
   }
 
+  const totalInvested = investments.reduce(
+    (total, investment) => total + Number(investment.cost_basis),
+    0,
+  );
+
+  const totalCurrentValue = investments.reduce(
+    (total, investment) =>
+      total +
+      (investment.market_data_available ? Number(investment.current_value) : 0),
+    0,
+  );
+
+  const totalGainLoss = totalCurrentValue - totalInvested;
+
+  const totalGainLossPercent =
+    totalInvested > 0 ? (totalGainLoss / totalInvested) * 100 : 0;
+
   return (
     <Box>
       <Box
@@ -237,6 +254,58 @@ function Investments() {
           Add Investment
         </Button>
       </Box>
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Portfolio Summary
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(3, 1fr)",
+              },
+              gap: 3,
+            }}
+          >
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Total Invested
+              </Typography>
+
+              <Typography variant="h5">${totalInvested.toFixed(2)}</Typography>
+            </Box>
+
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Current Value
+              </Typography>
+
+              <Typography variant="h5">
+                ${totalCurrentValue.toFixed(2)}
+              </Typography>
+            </Box>
+
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Total Gain / Loss
+              </Typography>
+
+              <Typography
+                variant="h5"
+                color={totalGainLoss >= 0 ? "success" : "error"}
+              >
+                {totalGainLoss >= 0 ? "+" : ""}${totalGainLoss.toFixed(2)}
+                {" ("}
+                {totalGainLossPercent >= 0 ? "+" : ""}
+                {totalGainLossPercent.toFixed(2)}%{")"}
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
       {investments.length === 0 ? (
         <Card>
           <CardContent>
@@ -298,13 +367,101 @@ function Investments() {
                   </Box>
                 </Box>
 
-                <Typography color="text.secondary" sx={{ mt: 2 }}>
-                  Purchase Price
-                </Typography>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 2,
+                    mt: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Quantity
+                    </Typography>
 
-                <Typography variant="h5">
-                  ${Number(investment.purchase_price).toFixed(2)}
-                </Typography>
+                    <Typography>{Number(investment.quantity)}</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Purchase Price
+                    </Typography>
+
+                    <Typography>
+                      ${Number(investment.purchase_price).toFixed(2)}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Cost Basis
+                    </Typography>
+
+                    <Typography>
+                      ${Number(investment.cost_basis).toFixed(2)}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Current Price
+                    </Typography>
+
+                    <Typography>
+                      {investment.market_data_available
+                        ? `$${Number(investment.current_price).toFixed(2)}`
+                        : "Unavailable"}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Current Value
+                    </Typography>
+
+                    <Typography>
+                      {investment.market_data_available
+                        ? `$${Number(investment.current_value).toFixed(2)}`
+                        : "Unavailable"}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Gain / Loss
+                  </Typography>
+
+                  {investment.market_data_available ? (
+                    <Typography
+                      variant="h6"
+                      color={
+                        Number(investment.gain_loss) >= 0 ? "success" : "error"
+                      }
+                    >
+                      {Number(investment.gain_loss) >= 0 ? "+" : ""}$
+                      {Number(investment.gain_loss).toFixed(2)} (
+                      {Number(investment.gain_loss_percent) >= 0 ? "+" : ""}
+                      {Number(investment.gain_loss_percent).toFixed(2)}% )
+                    </Typography>
+                  ) : (
+                    <Typography color="text.secondary">
+                      Market data unavailable
+                    </Typography>
+                  )}
+                  {investment.market_data_available && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        display: "block",
+                        mt: 1,
+                      }}
+                    >
+                      Market data as of {investment.latest_trading_day}
+                    </Typography>
+                  )}
+                </Box>
               </CardContent>
             </Card>
           ))}

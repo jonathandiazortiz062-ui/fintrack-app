@@ -7,6 +7,7 @@ import transactionRoutes from './routes/transactionRoutes.js';
 import budgetRoutes from './routes/budgetRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import investmentRoutes from './routes/investmentRoutes.js';
+import marketRoutes from './routes/marketRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use('/api/transactions', transactionRoutes); // Use transaction routes
 app.use('/api/budgets', budgetRoutes); // Use budget routes
 app.use('/api/dashboard', dashboardRoutes); // Use dashboard routes
 app.use('/api/investments', investmentRoutes); // Use investment routes
+app.use('/api/market', marketRoutes); // Use market routes
 
 
 app.get('/', (req, res) => {
