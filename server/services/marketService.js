@@ -10,6 +10,7 @@ export const fetchStockQuote = async (symbol) => {
     cachedQuote &&
     Date.now() - cachedQuote.timestamp < CACHE_DURATION
   ) {
+    
     return cachedQuote.data;
   }
 
@@ -21,6 +22,7 @@ export const fetchStockQuote = async (symbol) => {
     `&symbol=${encodeURIComponent(normalizedSymbol)}` +
     `&apikey=${apiKey}`;
 
+  
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -55,5 +57,6 @@ export const fetchStockQuote = async (symbol) => {
     timestamp: Date.now()
   });
 
+  
   return normalizedQuote;
 };
