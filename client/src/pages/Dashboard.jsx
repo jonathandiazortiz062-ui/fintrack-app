@@ -7,6 +7,7 @@ function Dashboard() {
     totalBalance: 0,
     monthlyIncome: 0,
     monthlyExpenses: 0,
+    totalInvestmentValue: 0,
   });
 
   const [loading, setLoading] = useState(true);
@@ -97,7 +98,9 @@ function Dashboard() {
             <CardContent>
               <Typography color="text.secondary">Investments</Typography>
 
-              <Typography variant="h5">$0.00</Typography>
+              <Typography variant="h5">
+                ${Number(summary.totalInvestmentValue).toFixed(2)}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
