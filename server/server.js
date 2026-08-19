@@ -8,6 +8,8 @@ import budgetRoutes from './routes/budgetRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import investmentRoutes from './routes/investmentRoutes.js';
 import marketRoutes from './routes/marketRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,6 +17,7 @@ const port = process.env.PORT || 3000;
 // Middleware to parse JSON requests
 app.use(express.json());
 app.use(cors({origin : 'http://localhost:5173'})); // Allow requests from the frontend
+app.use(cookieParser()); // Parse cookies
 app.use('/api/accounts', accountRoutes); // Use account routes
 app.use('/api/categories', categoryRoutes); // Use category routes
 app.use('/api/transactions', transactionRoutes); // Use transaction routes
@@ -22,6 +25,7 @@ app.use('/api/budgets', budgetRoutes); // Use budget routes
 app.use('/api/dashboard', dashboardRoutes); // Use dashboard routes
 app.use('/api/investments', investmentRoutes); // Use investment routes
 app.use('/api/market', marketRoutes); // Use market routes
+app.use('/api/auth', authRoutes); // Use authentication routes
 
 
 app.get('/', (req, res) => {

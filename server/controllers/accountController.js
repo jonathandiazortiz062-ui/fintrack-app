@@ -2,9 +2,10 @@ import pool from '../db/db.js';
 
 export const getAccounts = async (req, res) => {
   try {
+    const userId = req.user.id;
     const result = await pool.query(
       'SELECT * FROM accounts WHERE user_id = $1 ORDER BY id',
-      [1]
+      [userId]
     );
 
     res.json(result.rows);
@@ -20,13 +21,14 @@ export const getAccounts = async (req, res) => {
 export const getAccountById = async (req, res) => {
   try {
     const accountId = req.params.id;
+    const userId = req.user.id;
 
     const result = await pool.query(
       `SELECT *
        FROM accounts
        WHERE id = $1
        AND user_id = $2`,
-      [accountId, 1]
+      [accountId, userId]
     );
 
     if (result.rows.length === 0) {
@@ -47,6 +49,7 @@ export const getAccountById = async (req, res) => {
 
 export const createAccount = async (req, res) => {
   try {
+    const userId = req.user.id;
     const { name, accountType, balance } = req.body;
 
     if (!name || !accountType) {
@@ -65,7 +68,7 @@ export const createAccount = async (req, res) => {
       VALUES ($1, $2, $3, $4)
       RETURNING *`,
       [
-        1,
+        userId,
         name,
         accountType,
         balance ?? 0
@@ -85,6 +88,7 @@ export const createAccount = async (req, res) => {
 export const updateAccount = async (req, res) => {
   try {
     const accountId = req.params.id;
+    const userId = req.user.id;
 
     const {
       name,
@@ -112,7 +116,7 @@ export const updateAccount = async (req, res) => {
         accountType,
         balance ?? 0,
         accountId,
-        1
+        userId
       ]
     );
 
@@ -136,6 +140,7 @@ export const updateAccount = async (req, res) => {
 export const deleteAccount = async (req, res) => {
   try {
     const accountId = req.params.id;
+    const userId = req.user.id;
 
     const result = await pool.query(
       `DELETE FROM accounts
@@ -144,7 +149,7 @@ export const deleteAccount = async (req, res) => {
        RETURNING *`,
       [
         accountId,
-        1
+        userId
       ]
     );
 

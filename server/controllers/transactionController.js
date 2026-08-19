@@ -3,8 +3,8 @@ import pool from "../db/db.js";
 export const getTransactions = async (req, res) => {
   try {
     const { accountId, categoryId, type, startDate, endDate } = req.query;
-
-    const values = [1];
+    const userId = req.user.id;
+    const values = [userId];
 
     let query = `
       SELECT
@@ -85,6 +85,7 @@ export const getTransactions = async (req, res) => {
 
 export const createTransaction = async (req, res) => {
   try {
+    const userId = req.user.id;
     const {
       accountId,
       categoryId,
@@ -111,7 +112,7 @@ export const createTransaction = async (req, res) => {
        FROM accounts
        WHERE id = $1
        AND user_id = $2`,
-      [accountId, 1],
+      [accountId, userId]
     );
 
     if (accountCheck.rows.length === 0) {
@@ -154,6 +155,7 @@ export const createTransaction = async (req, res) => {
 export const updateTransaction = async (req, res) => {
   try {
     const transactionId = req.params.id;
+    const userId = req.user.id;
 
     const {
       accountId,
@@ -181,7 +183,7 @@ export const updateTransaction = async (req, res) => {
        FROM accounts
        WHERE id = $1
        AND user_id = $2`,
-      [accountId, 1],
+      [accountId, userId],
     );
 
     if (accountCheck.rows.length === 0) {
@@ -214,7 +216,7 @@ export const updateTransaction = async (req, res) => {
         transactionType,
         transactionDate,
         transactionId,
-        1,
+        userId,
       ],
     );
 
@@ -237,7 +239,7 @@ export const updateTransaction = async (req, res) => {
 export const deleteTransaction = async (req, res) => {
   try {
     const transactionId = req.params.id;
-
+    const userId = req.user.id;
     const result = await pool.query(
       `DELETE FROM transactions
        WHERE id = $1
@@ -247,7 +249,7 @@ export const deleteTransaction = async (req, res) => {
          WHERE user_id = $2
        )
        RETURNING *`,
-      [transactionId, 1],
+      [transactionId, userId],
     );
 
     if (result.rows.length === 0) {
