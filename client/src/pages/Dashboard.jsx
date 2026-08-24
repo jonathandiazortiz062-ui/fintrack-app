@@ -17,7 +17,7 @@ function Dashboard() {
     const fetchSummary = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/dashboard/summary`,
+          `${import.meta.env.VITE_API_URL}/api/dashboard/summary`, { credentials: "include" }
         );
 
         if (!response.ok) {

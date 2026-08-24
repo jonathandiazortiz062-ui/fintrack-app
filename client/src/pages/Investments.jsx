@@ -81,7 +81,7 @@ function Investments() {
           headers: {
             "Content-Type": "application/json",
           },
-
+          credentials: "include",
           body: JSON.stringify({
             symbol: formData.symbol,
             quantity: Number(formData.quantity),
@@ -120,7 +120,7 @@ function Investments() {
           headers: {
             "Content-Type": "application/json",
           },
-
+          credentials: "include",
           body: JSON.stringify({
             symbol: formData.symbol,
             quantity: Number(formData.quantity),
@@ -157,6 +157,7 @@ function Investments() {
         `${import.meta.env.VITE_API_URL}/api/investments/${investmentId}`,
         {
           method: "DELETE",
+          credentials: "include",
         },
       );
 
@@ -176,7 +177,7 @@ function Investments() {
 
   const fetchInvestments = async () => {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/investments`,
+      `${import.meta.env.VITE_API_URL}/api/investments`, { credentials: "include" }
     );
 
     if (!response.ok) {

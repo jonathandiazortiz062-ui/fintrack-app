@@ -5,12 +5,11 @@ export const getCategories = async (req, res) => {
     const result = await pool.query(
       `SELECT *
        FROM categories
-       WHERE user_id = $1
-       ORDER BY name`,
-      [1]
+       ORDER BY name`
     );
 
     res.json(result.rows);
+
   } catch (error) {
     console.error('Error fetching categories:', error);
 

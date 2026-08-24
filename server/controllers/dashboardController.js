@@ -3,7 +3,7 @@ import { fetchStockQuote } from "../services/marketService.js";
 
 export const getDashboardSummary = async (req, res) => {
   try {
-    const userId = 1;
+    const userId = req.user.id;
 
     const balanceResult = await pool.query(
       `SELECT COALESCE(SUM(balance), 0) AS total_balance

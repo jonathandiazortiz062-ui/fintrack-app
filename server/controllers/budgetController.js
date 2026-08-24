@@ -2,6 +2,7 @@ import pool from '../db/db.js';
 
 export const getBudgets = async (req, res) => {
   try {
+    const userId = req.user.id;
     const result = await pool.query(
       `SELECT
         budgets.id,
@@ -47,7 +48,7 @@ export const getBudgets = async (req, res) => {
         budgets.created_at
 
       ORDER BY categories.name`,
-      [1]
+      [userId]
     );
 
     res.json(result.rows);
@@ -64,6 +65,8 @@ export const getBudgets = async (req, res) => {
 //CRUD:
 export const createBudget = async (req, res) => {
   try {
+    const userId = req.user.id;
+
     const {
       categoryId,
       monthlyLimit
@@ -78,9 +81,8 @@ export const createBudget = async (req, res) => {
     const categoryCheck = await pool.query(
       `SELECT id
        FROM categories
-       WHERE id = $1
-       AND user_id = $2`,
-      [categoryId, 1]
+       WHERE id = $1`,
+      [categoryId]
     );
 
     if (categoryCheck.rows.length === 0) {
@@ -98,7 +100,7 @@ export const createBudget = async (req, res) => {
       VALUES ($1, $2, $3)
       RETURNING *`,
       [
-        1,
+        userId,
         categoryId,
         monthlyLimit
       ]
@@ -109,6 +111,12 @@ export const createBudget = async (req, res) => {
   } catch (error) {
     console.error('Error creating budget:', error);
 
+    if (error.code === '23505') {
+      return res.status(409).json({
+        message: 'A budget already exists for this category'
+      });
+    }
+
     res.status(500).json({
       message: 'Unable to create budget'
     });
@@ -117,6 +125,7 @@ export const createBudget = async (req, res) => {
 
 export const updateBudget = async (req, res) => {
   try {
+    const userId = req.user.id;
     const budgetId = req.params.id;
 
     const {
@@ -133,9 +142,8 @@ export const updateBudget = async (req, res) => {
     const categoryCheck = await pool.query(
       `SELECT id
        FROM categories
-       WHERE id = $1
-       AND user_id = $2`,
-      [categoryId, 1]
+       WHERE id = $1`,
+      [categoryId]
     );
 
     if (categoryCheck.rows.length === 0) {
@@ -156,7 +164,7 @@ export const updateBudget = async (req, res) => {
         categoryId,
         monthlyLimit,
         budgetId,
-        1
+        userId
       ]
     );
 
@@ -171,6 +179,12 @@ export const updateBudget = async (req, res) => {
   } catch (error) {
     console.error('Error updating budget:', error);
 
+    if (error.code === '23505') {
+      return res.status(409).json({
+        message: 'A budget already exists for this category'
+      });
+    }
+
     res.status(500).json({
       message: 'Unable to update budget'
     });
@@ -179,6 +193,7 @@ export const updateBudget = async (req, res) => {
 
 export const deleteBudget = async (req, res) => {
   try {
+    const userId = req.user.id;
     const budgetId = req.params.id;
 
     const result = await pool.query(
@@ -188,7 +203,7 @@ export const deleteBudget = async (req, res) => {
        RETURNING *`,
       [
         budgetId,
-        1
+        userId
       ]
     );
 

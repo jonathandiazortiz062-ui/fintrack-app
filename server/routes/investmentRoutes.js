@@ -1,5 +1,5 @@
 import express from 'express';
-
+import {requireAuth} from '../middleware/authMiddleware.js';
 import {
   getInvestments,
   createInvestment,
@@ -7,7 +7,9 @@ import {
   deleteInvestment
 } from '../controllers/investmentController.js';
 
+
 const router = express.Router();
+router.use(requireAuth);
 
 router.get('/', getInvestments);
 router.post('/', createInvestment);

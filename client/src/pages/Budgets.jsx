@@ -82,7 +82,7 @@ function Budgets() {
           headers: {
             "Content-Type": "application/json",
           },
-
+          credentials: "include",
           body: JSON.stringify({
             categoryId: Number(formData.categoryId),
             monthlyLimit: Number(formData.monthlyLimit),
@@ -126,6 +126,7 @@ function Budgets() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({
             categoryId: Number(formData.categoryId),
             monthlyLimit: Number(formData.monthlyLimit),
@@ -158,6 +159,7 @@ function Budgets() {
         `${import.meta.env.VITE_API_URL}/api/budgets/${budgetId}`,
         {
           method: "DELETE",
+          credentials: "include",
         },
       );
 
@@ -172,7 +174,7 @@ function Budgets() {
   };
 
   const fetchBudgets = async () => {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/budgets`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/budgets`, { credentials: "include" });
 
     if (!response.ok) {
       throw new Error("Failed to fetch budgets");
@@ -187,8 +189,8 @@ function Budgets() {
     const fetchData = async () => {
       try {
         const [budgetsResponse, categoriesResponse] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/budgets`),
-          fetch(`${import.meta.env.VITE_API_URL}/api/categories`),
+          fetch(`${import.meta.env.VITE_API_URL}/api/budgets`, { credentials: "include" }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/categories`, { credentials: "include" }),
         ]);
 
         if (!budgetsResponse.ok || !categoriesResponse.ok) {

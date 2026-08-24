@@ -3,6 +3,7 @@ import { fetchStockQuote } from "../services/marketService.js";
 
 export const getInvestments = async (req, res) => {
   try {
+    const userId = req.user.id;
     const result = await pool.query(
       `SELECT
         id,
@@ -14,7 +15,7 @@ export const getInvestments = async (req, res) => {
        FROM investments
        WHERE user_id = $1
        ORDER BY symbol`,
-      [1],
+      [userId],
     );
 
     const investmentsWithMarketData = await Promise.all(
@@ -80,6 +81,7 @@ export const getInvestments = async (req, res) => {
 export const createInvestment = async (req, res) => {
   try {
     const { symbol, quantity, purchasePrice } = req.body;
+    const userId = req.user.id;
 
     if (!symbol || !quantity || !purchasePrice) {
       return res.status(400).json({
@@ -96,7 +98,7 @@ export const createInvestment = async (req, res) => {
        )
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [1, symbol.toUpperCase(), quantity, purchasePrice],
+      [userId, symbol.toUpperCase(), quantity, purchasePrice],
     );
 
     res.status(201).json(result.rows[0]);
@@ -112,6 +114,7 @@ export const createInvestment = async (req, res) => {
 export const updateInvestment = async (req, res) => {
   try {
     const investmentId = req.params.id;
+    const userId = req.user.id;
 
     const { symbol, quantity, purchasePrice } = req.body;
 
@@ -130,7 +133,7 @@ export const updateInvestment = async (req, res) => {
        WHERE id = $4
        AND user_id = $5
        RETURNING *`,
-      [symbol.toUpperCase(), quantity, purchasePrice, investmentId, 1],
+      [symbol.toUpperCase(), quantity, purchasePrice, investmentId, userId],
     );
 
     if (result.rows.length === 0) {
@@ -152,13 +155,14 @@ export const updateInvestment = async (req, res) => {
 export const deleteInvestment = async (req, res) => {
   try {
     const investmentId = req.params.id;
+    const userId = req.user.id;
 
     const result = await pool.query(
       `DELETE FROM investments
        WHERE id = $1
        AND user_id = $2
        RETURNING *`,
-      [investmentId, 1],
+      [investmentId, userId],
     );
 
     if (result.rows.length === 0) {

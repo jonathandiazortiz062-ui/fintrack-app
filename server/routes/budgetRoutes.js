@@ -1,4 +1,5 @@
 import express from 'express';
+import {requireAuth} from '../middleware/authMiddleware.js';
 
 import {
   getBudgets,
@@ -8,6 +9,7 @@ import {
 } from '../controllers/budgetController.js';
 
 const router = express.Router();
+router.use(requireAuth);
 
 router.get('/', getBudgets);
 router.post('/', createBudget);

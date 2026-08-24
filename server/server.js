@@ -16,7 +16,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware to parse JSON requests
 app.use(express.json());
-app.use(cors({origin : 'http://localhost:5173'})); // Allow requests from the frontend
+app.use(cors({origin : 'http://localhost:5173', credentials: true})); // Allow requests from the frontend
 app.use(cookieParser()); // Parse cookies
 app.use('/api/accounts', accountRoutes); // Use account routes
 app.use('/api/categories', categoryRoutes); // Use category routes

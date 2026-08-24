@@ -71,7 +71,7 @@ function Accounts() {
           headers: {
             "Content-Type": "application/json",
           },
-
+          credentials: "include",
           body: JSON.stringify({
             name: formData.name,
             accountType: formData.accountType,
@@ -122,6 +122,7 @@ function Accounts() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
 
           body: JSON.stringify({
             name: formData.name,
@@ -163,6 +164,7 @@ function Accounts() {
         `${import.meta.env.VITE_API_URL}/api/accounts/${accountId}`,
         {
           method: "DELETE",
+          credentials: "include",
         },
       );
 
@@ -181,6 +183,7 @@ function Accounts() {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/accounts`,
+          { credentials: "include" }
         );
 
         if (!response.ok) {

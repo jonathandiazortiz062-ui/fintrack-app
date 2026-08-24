@@ -136,7 +136,7 @@ function Transactions() {
           headers: {
             "Content-Type": "application/json",
           },
-
+          credentials: "include",
           body: JSON.stringify({
             accountId: Number(formData.accountId),
 
@@ -186,6 +186,7 @@ function Transactions() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
 
           body: JSON.stringify({
             accountId: Number(formData.accountId),
@@ -234,6 +235,7 @@ function Transactions() {
         `${import.meta.env.VITE_API_URL}/api/transactions/${transactionId}`,
         {
           method: "DELETE",
+          credentials: "include",
         },
       );
 
@@ -278,7 +280,7 @@ function Transactions() {
       ? `${import.meta.env.VITE_API_URL}/api/transactions?${queryString}`
       : `${import.meta.env.VITE_API_URL}/api/transactions`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, { credentials: "include" });
 
     if (!response.ok) {
       throw new Error("Failed to fetch transactions");
@@ -294,9 +296,9 @@ function Transactions() {
       try {
         const [transactionsResponse, accountsResponse, categoriesResponse] =
           await Promise.all([
-            fetch(`${import.meta.env.VITE_API_URL}/api/transactions`),
-            fetch(`${import.meta.env.VITE_API_URL}/api/accounts`),
-            fetch(`${import.meta.env.VITE_API_URL}/api/categories`),
+            fetch(`${import.meta.env.VITE_API_URL}/api/transactions`, { credentials: "include" }),
+            fetch(`${import.meta.env.VITE_API_URL}/api/accounts`, { credentials: "include" }),
+            fetch(`${import.meta.env.VITE_API_URL}/api/categories`, { credentials: "include" }),
           ]);
 
         if (
