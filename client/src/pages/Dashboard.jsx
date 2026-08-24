@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 
 function Dashboard() {
-  const [apiStatus, setApiStatus] = useState("Checking API...");
   const [summary, setSummary] = useState({
     totalBalance: 0,
     monthlyIncome: 0,
@@ -12,12 +11,14 @@ function Dashboard() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [recentTransactions, setRecentTransactions] = useState([]);
 
   useEffect(() => {
     const fetchSummary = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/dashboard/summary`, { credentials: "include" }
+          `${import.meta.env.VITE_API_URL}/api/dashboard/summary`,
+          { credentials: "include" },
         );
 
         if (!response.ok) {
@@ -35,7 +36,29 @@ function Dashboard() {
       }
     };
 
+    const fetchRecentTransactions = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/transactions`,
+          { credentials: "include" },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch recent transactions");
+        }
+
+        const data = await response.json();
+
+        setRecentTransactions(data.slice(0, 5)); // Get the 5 most recent transactions
+      } catch (error) {
+        console.error("Error loading recent transactions:", error);
+        setError("Unable to load recent transactions");
+      }
+    };
+
+    fetchRecentTransactions();
     fetchSummary();
+
   }, []);
 
   if (loading) {
@@ -105,18 +128,46 @@ function Dashboard() {
           </Card>
         </Grid>
       </Grid>
+      {recentTransactions.length > 0 ? (
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            Recent Transactions
+          </Typography>
 
-      <Typography variant="h6" sx={{ mt: 4, mb: 1 }}>
-        Recent Transactions
-      </Typography>
+          {recentTransactions.map((transaction) => (
+            <Card key={transaction.id} sx={{ mb: 1 }}>
+              <CardContent>
+                <Typography variant="h6">
+                        {transaction.description}
+                      </Typography>
 
-      <Typography color="text.secondary">
-        No recent transactions to display.
-      </Typography>
-
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 4 }}>
-        API Status: {apiStatus}
-      </Typography>
+                      <Typography color="text.secondary">
+                        {transaction.account_name}
+                        {" • "}
+                        {transaction.category_name || "Uncategorized"}
+                      </Typography>
+                      <Typography color={transaction.transaction_type === "income" ? "success" : "error"}>
+                        {transaction.transaction_type === "income" ? "+" : "-"}$
+                        {Number(transaction.amount).toFixed(2)}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mt: 1 }}
+                      >
+                        {new Date(
+                          transaction.transaction_date,
+                        ).toLocaleDateString()}
+                      </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      ) : (
+        <Typography color="text.secondary">
+          No recent transactions to display.
+        </Typography>
+      )}
     </Box>
   );
 }

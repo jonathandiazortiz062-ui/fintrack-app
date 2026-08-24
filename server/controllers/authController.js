@@ -162,3 +162,15 @@ export const getCurrentUser = async (req, res) => {
     });
   }
 };
+
+export const logout = (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax'
+  });
+
+  res.json({
+    message: 'Logged out successfully'
+  });
+};

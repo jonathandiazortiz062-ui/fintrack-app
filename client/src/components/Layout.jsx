@@ -8,7 +8,7 @@ import {
   ListItemText,
   Toolbar,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
 import {
   Dashboard as DashboardIcon,
@@ -16,16 +16,39 @@ import {
   ReceiptLong,
   Savings,
   TrendingUp,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
-import { Link, Outlet } from 'react-router-dom';
+import LogoutIcon from "@mui/icons-material/Logout";
+
+import { Link, Outlet } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
 function Layout() {
-  return (
-    <Box sx={{ display: 'flex' }}>
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
 
+      if (!response.ok) {
+        throw new Error("Unable to log out");
+      }
+
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  return (
+    <Box sx={{ display: "flex" }}>
       <AppBar
         position="fixed"
         sx={{
@@ -33,9 +56,7 @@ function Layout() {
         }}
       >
         <Toolbar>
-          <Typography variant="h6">
-            FinTrack
-          </Typography>
+          <Typography variant="h6">FinTrack</Typography>
         </Toolbar>
       </AppBar>
 
@@ -45,16 +66,15 @@ function Layout() {
           width: drawerWidth,
           flexShrink: 0,
 
-          '& .MuiDrawer-paper': {
+          "& .MuiDrawer-paper": {
             width: drawerWidth,
-            boxSizing: 'border-box',
+            boxSizing: "border-box",
           },
         }}
       >
         <Toolbar />
 
         <List>
-
           <ListItemButton component={Link} to="/">
             <ListItemIcon>
               <DashboardIcon />
@@ -94,9 +114,14 @@ function Layout() {
 
             <ListItemText primary="Investments" />
           </ListItemButton>
+          <ListItemButton onClick={handleLogout}>
+            <ListItemIcon>
+              <LogoutIcon />
+            </ListItemIcon>
 
+            <ListItemText primary="Logout" />
+          </ListItemButton>
         </List>
-
       </Drawer>
 
       <Box
@@ -110,7 +135,6 @@ function Layout() {
 
         <Outlet />
       </Box>
-
     </Box>
   );
 }

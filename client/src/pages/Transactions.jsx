@@ -539,7 +539,7 @@ function Transactions() {
                       </IconButton>
                     </Box>
 
-                    <Typography variant="h6">
+                    <Typography variant="h6" color={transaction.transaction_type === "income" ? "success" : "error"}>
                       {transaction.transaction_type === "expense" ? "-" : "+"}$
                       {Number(transaction.amount).toFixed(2)}
                     </Typography>
