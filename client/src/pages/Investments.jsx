@@ -55,6 +55,12 @@ function Investments() {
       purchasePrice: "",
     });
 
+    setFormErrors({
+      symbol: "",
+      quantity: "",
+      purchasePrice: "",
+    });
+
     setOpen(true);
   };
 
@@ -67,11 +73,61 @@ function Investments() {
       purchasePrice: investment.purchase_price,
     });
 
+    setFormErrors({
+      symbol: "",
+      quantity: "",
+      purchasePrice: "",
+    });
+
     setOpen(true);
+  };
+
+  //Validations:
+  const [formErrors, setFormErrors] = useState({
+    symbol: "",
+    quantity: "",
+    purchasePrice: "",
+  });
+
+  const validateForm = () => {
+    const errors = {
+      symbol: "",
+      quantity: "",
+      purchasePrice: "",
+    };
+
+    if (!formData.symbol.trim()) {
+      errors.symbol = "Symbol is required";
+    }
+
+    if (formData.quantity === "") {
+      errors.quantity = "Quantity is required";
+    } else if (
+      Number.isNaN(Number(formData.quantity)) ||
+      Number(formData.quantity) <= 0
+    ) {
+      errors.quantity = "Quantity must be greater than 0";
+    }
+
+    if (formData.purchasePrice === "") {
+      errors.purchasePrice = "Purchase price is required";
+    } else if (
+      Number.isNaN(Number(formData.purchasePrice)) ||
+      Number(formData.purchasePrice) <= 0
+    ) {
+      errors.purchasePrice = "Purchase price must be greater than 0";
+    }
+
+    setFormErrors(errors);
+
+    return !Object.values(errors).some((message) => message !== "");
   };
 
   //CRUD:
   const handleCreateInvestment = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/investments`,
@@ -111,6 +167,9 @@ function Investments() {
   };
 
   const handleUpdateInvestment = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/investments/${editingInvestmentId}`,
@@ -177,7 +236,8 @@ function Investments() {
 
   const fetchInvestments = async () => {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/investments`, { credentials: "include" }
+      `${import.meta.env.VITE_API_URL}/api/investments`,
+      { credentials: "include" },
     );
 
     if (!response.ok) {
@@ -486,6 +546,8 @@ function Investments() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.symbol)}
+            helperText={formErrors.symbol}
           />
 
           <TextField
@@ -496,6 +558,8 @@ function Investments() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.quantity)}
+            helperText={formErrors.quantity}
           />
 
           <TextField
@@ -506,6 +570,8 @@ function Investments() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.purchasePrice)}
+            helperText={formErrors.purchasePrice}
           />
         </DialogContent>
 

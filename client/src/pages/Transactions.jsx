@@ -73,6 +73,14 @@ function Transactions() {
       transactionDate: "",
     });
 
+    setFormErrors({
+      accountId: "",
+      description: "",
+      amount: "",
+      transactionType: "",
+      transactionDate: "",
+    });
+
     setOpen(true);
   };
   const handleEditTransaction = (transaction) => {
@@ -85,6 +93,14 @@ function Transactions() {
       amount: transaction.amount,
       transactionType: transaction.transaction_type,
       transactionDate: transaction.transaction_date.slice(0, 10),
+    });
+
+    setFormErrors({
+      accountId: "",
+      description: "",
+      amount: "",
+      transactionType: "",
+      transactionDate: "",
     });
 
     setOpen(true);
@@ -125,8 +141,59 @@ function Transactions() {
     }
   };
 
+  //Validattions:
+  const [formErrors, setFormErrors] = useState({
+    accountId: "",
+    description: "",
+    amount: "",
+    transactionType: "",
+    transactionDate: "",
+  });
+
+  const validateForm = () => {
+    const errors = {
+      accountId: "",
+      description: "",
+      amount: "",
+      transactionType: "",
+      transactionDate: "",
+    };
+
+    if (!formData.accountId) {
+      errors.accountId = "Account is required";
+    }
+
+    if (!formData.description.trim()) {
+      errors.description = "Description is required";
+    }
+
+    if (formData.amount === "") {
+      errors.amount = "Amount is required";
+    } else if (
+      Number.isNaN(Number(formData.amount)) ||
+      Number(formData.amount) <= 0
+    ) {
+      errors.amount = "Amount must be greater than 0";
+    }
+
+    if (!formData.transactionType) {
+      errors.transactionType = "Transaction type is required";
+    }
+
+    if (!formData.transactionDate) {
+      errors.transactionDate = "Transaction date is required";
+    }
+
+    setFormErrors(errors);
+
+    return !Object.values(errors).some((message) => message !== "");
+  };
+
   //CRUD:
   const handleCreateTransaction = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/transactions`,
@@ -177,6 +244,9 @@ function Transactions() {
   };
 
   const handleUpdateTransaction = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/transactions/${editingTransactionId}`,
@@ -296,9 +366,15 @@ function Transactions() {
       try {
         const [transactionsResponse, accountsResponse, categoriesResponse] =
           await Promise.all([
-            fetch(`${import.meta.env.VITE_API_URL}/api/transactions`, { credentials: "include" }),
-            fetch(`${import.meta.env.VITE_API_URL}/api/accounts`, { credentials: "include" }),
-            fetch(`${import.meta.env.VITE_API_URL}/api/categories`, { credentials: "include" }),
+            fetch(`${import.meta.env.VITE_API_URL}/api/transactions`, {
+              credentials: "include",
+            }),
+            fetch(`${import.meta.env.VITE_API_URL}/api/accounts`, {
+              credentials: "include",
+            }),
+            fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
+              credentials: "include",
+            }),
           ]);
 
         if (
@@ -539,7 +615,14 @@ function Transactions() {
                       </IconButton>
                     </Box>
 
-                    <Typography variant="h6" color={transaction.transaction_type === "income" ? "success" : "error"}>
+                    <Typography
+                      variant="h6"
+                      color={
+                        transaction.transaction_type === "income"
+                          ? "success"
+                          : "error"
+                      }
+                    >
                       {transaction.transaction_type === "expense" ? "-" : "+"}$
                       {Number(transaction.amount).toFixed(2)}
                     </Typography>
@@ -569,6 +652,8 @@ function Transactions() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.accountId)}
+            helperText={formErrors.accountId}
           >
             {accounts.map((account) => (
               <MenuItem key={account.id} value={account.id}>
@@ -602,6 +687,8 @@ function Transactions() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.description)}
+            helperText={formErrors.description}
           />
 
           <TextField
@@ -612,6 +699,8 @@ function Transactions() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.amount)}
+            helperText={formErrors.amount}
           />
 
           <TextField
@@ -622,6 +711,8 @@ function Transactions() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.transactionType)}
+            helperText={formErrors.transactionType}
           >
             <MenuItem value="income">Income</MenuItem>
 
@@ -636,6 +727,8 @@ function Transactions() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.transactionDate)}
+            helperText={formErrors.transactionDate}
             slotProps={{
               inputLabel: {
                 shrink: true,

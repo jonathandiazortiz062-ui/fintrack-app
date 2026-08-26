@@ -19,8 +19,39 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Validations:
+  const [formErrors, setFormErrors] = useState({
+    email: "",
+    password: "",
+  });
+
+  const validateForm = () => {
+    const errors = {
+      email: "",
+      password: "",
+    };
+
+    if (!formData.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Enter a valid email address";
+    }
+
+    if (!formData.password) {
+      errors.password = "Password is required";
+    }
+
+    setFormErrors(errors);
+
+    return !Object.values(errors).some((message) => message !== "");
+  };
+
   const handleChange = (event) => {
     const { name, value } = event.target;
+    setFormErrors({
+      email: "",
+      password: "",
+    });
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -28,6 +59,9 @@ function Login() {
   };
 
   const handleLogin = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       setLoading(true);
       setError("");
@@ -85,6 +119,8 @@ function Login() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.email)}
+            helperText={formErrors.email}
           />
 
           <TextField
@@ -95,6 +131,8 @@ function Login() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.password)}
+            helperText={formErrors.password}
           />
           {error && (
             <Typography color="error" sx={{ mt: 1 }}>

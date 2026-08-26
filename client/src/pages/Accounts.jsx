@@ -36,10 +36,17 @@ function Accounts() {
     balance: "",
   });
 
+  //Regular handlers:
   const handleOpen = () => {
     setEditingAccountId(null);
 
     setFormData({
+      name: "",
+      accountType: "",
+      balance: "",
+    });
+
+    setFormErrors({
       name: "",
       accountType: "",
       balance: "",
@@ -60,8 +67,63 @@ function Accounts() {
       [name]: value,
     }));
   };
+
+  const handleEdit = (account) => {
+    setEditingAccountId(account.id);
+
+    setFormData({
+      name: account.name,
+      accountType: account.account_type,
+      balance: account.balance,
+    });
+
+    setFormErrors({
+      name: "",
+      accountType: "",
+      balance: "",
+    });
+
+    setOpen(true);
+  };
+
+  // Validations:
+  const [formErrors, setFormErrors] = useState({
+    name: "",
+    accountType: "",
+    balance: "",
+  });
+
+  const validateForm = () => {
+    const errors = {
+      name: "",
+      accountType: "",
+      balance: "",
+    };
+
+    if (!formData.name.trim()) {
+      errors.name = "Account name is required";
+    }
+
+    if (!formData.accountType) {
+      errors.accountType = "Account type is required";
+    }
+
+    if (formData.balance === "") {
+      errors.balance = "Balance is required";
+    } else if (Number.isNaN(Number(formData.balance))) {
+      errors.balance = "Balance must be a valid number";
+    }
+
+    setFormErrors(errors);
+
+    return !Object.values(errors).some((message) => message !== "");
+  };
+
   //CRUD operaions for accounts
   const handleCreateAccount = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/accounts`,
@@ -100,19 +162,10 @@ function Accounts() {
     }
   };
 
-  const handleEdit = (account) => {
-    setEditingAccountId(account.id);
-
-    setFormData({
-      name: account.name,
-      accountType: account.account_type,
-      balance: account.balance,
-    });
-
-    setOpen(true);
-  };
-
   const handleUpdateAccount = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/accounts/${editingAccountId}`,
@@ -183,7 +236,7 @@ function Accounts() {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/accounts`,
-          { credentials: "include" }
+          { credentials: "include" },
         );
 
         if (!response.ok) {
@@ -311,6 +364,8 @@ function Accounts() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.name)}
+            helperText={formErrors.name}
           />
 
           <TextField
@@ -321,6 +376,8 @@ function Accounts() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.accountType)}
+            helperText={formErrors.accountType}
           >
             <MenuItem value="checking">Checking</MenuItem>
 
@@ -339,6 +396,8 @@ function Accounts() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.balance)}
+            helperText={formErrors.balance}
           />
         </DialogContent>
 

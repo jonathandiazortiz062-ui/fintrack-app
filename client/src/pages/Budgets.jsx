@@ -48,6 +48,13 @@ function Budgets() {
       monthlyLimit: "",
     });
 
+    setFormErrors({
+      categoryId: "",
+      monthlyLimit: "",
+    });
+
+    setDuplicateError("");
+
     setOpen(true);
   };
 
@@ -68,11 +75,47 @@ function Budgets() {
       monthlyLimit: budget.monthly_limit,
     });
 
+    setDuplicateError("");
+
     setOpen(true);
+  };
+
+  //Validations:
+  const [formErrors, setFormErrors] = useState({
+    categoryId: "",
+    monthlyLimit: "",
+  });
+  const [duplicateError, setDuplicateError] = useState("");
+
+  const validateForm = () => {
+    const errors = {
+      categoryId: "",
+      monthlyLimit: "",
+    };
+
+    if (!formData.categoryId) {
+      errors.categoryId = "Category is required";
+    }
+
+    if (formData.monthlyLimit === "") {
+      errors.monthlyLimit = "Monthly limit is required";
+    } else if (
+      Number.isNaN(Number(formData.monthlyLimit)) ||
+      Number(formData.monthlyLimit) <= 0
+    ) {
+      errors.monthlyLimit = "Monthly limit must be greater than 0";
+    }
+
+    setFormErrors(errors);
+
+    return !Object.values(errors).some((message) => message !== "");
   };
 
   //CRUD:
   const handleCreateBudget = async (req, res) => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/budgets`,
@@ -91,7 +134,9 @@ function Budgets() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to create budget");
+        const errorData = await response.json();
+
+        throw new Error(errorData.message || "Failed to create budget");
       }
 
       await fetchBudgets();
@@ -104,20 +149,16 @@ function Budgets() {
       setOpen(false);
     } catch (error) {
       console.error("Error creating budget:", error);
-
-      if (error.code === "23505") {
-        return res.status(409).json({
-          message: "Budget for this category already exists",
-        });
-      }
-
-      res.status(500).json({
-        message: "Unable to create budget",
-      });
+      setDuplicateError(
+        error.message || "An error occurred while creating the budget",
+      );
     }
   };
 
   const handleUpdateBudget = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/budgets/${editingBudgetId}`,
@@ -135,7 +176,9 @@ function Budgets() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update budget");
+        const errorData = await response.json();
+
+        throw new Error(errorData.message || "Failed to update budget");
       }
 
       await fetchBudgets();
@@ -150,6 +193,7 @@ function Budgets() {
       setOpen(false);
     } catch (error) {
       console.error("Error updating budget:", error);
+      setDuplicateError(error.message || "An error occurred while updating the budget");
     }
   };
 
@@ -174,7 +218,10 @@ function Budgets() {
   };
 
   const fetchBudgets = async () => {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/budgets`, { credentials: "include" });
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/budgets`,
+      { credentials: "include" },
+    );
 
     if (!response.ok) {
       throw new Error("Failed to fetch budgets");
@@ -189,8 +236,12 @@ function Budgets() {
     const fetchData = async () => {
       try {
         const [budgetsResponse, categoriesResponse] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/budgets`, { credentials: "include" }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/categories`, { credentials: "include" }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/budgets`, {
+            credentials: "include",
+          }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
+            credentials: "include",
+          }),
         ]);
 
         if (!budgetsResponse.ok || !categoriesResponse.ok) {
@@ -332,15 +383,20 @@ function Budgets() {
                     variant="determinate"
                     value={Math.min(percentage, 100)}
                     sx={{ mt: 1 }}
-                    color={percentage >= 75 && percentage < 100 ? "warning" : isOverBudget ? "error" : "primary"}
+                    color={
+                      percentage >= 75 && percentage < 100
+                        ? "warning"
+                        : isOverBudget
+                          ? "error"
+                          : "primary"
+                    }
                   />
                   <Typography
                     variant="body2"
                     color={isOverBudget ? "error" : "text.secondary"}
                     sx={{ mt: 0.5 }}
                   >
-                    {percentage.toFixed(1)}%
-                    {isOverBudget && " - Over Budget"}
+                    {percentage.toFixed(1)}%{isOverBudget && " - Over Budget"}
                   </Typography>
                 </CardContent>
               </Card>
@@ -367,6 +423,8 @@ function Budgets() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.categoryId)}
+            helperText={formErrors.categoryId}
           >
             {categories.map((category) => (
               <MenuItem key={category.id} value={category.id}>
@@ -383,7 +441,14 @@ function Budgets() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.monthlyLimit)}
+            helperText={formErrors.monthlyLimit}
           />
+          {duplicateError && (
+            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+              {duplicateError}
+            </Typography>
+          )}
         </DialogContent>
 
         <DialogActions>

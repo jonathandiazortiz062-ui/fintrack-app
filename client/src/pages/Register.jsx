@@ -17,6 +17,7 @@ function Register() {
     lastName: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const [error, setError] = useState("");
@@ -31,7 +32,59 @@ function Register() {
     }));
   };
 
+  //Validations:
+  const [formErrors, setFormErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const validateForm = () => {
+    const errors = {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    };
+
+    if (!formData.firstName.trim()) {
+      errors.firstName = "First name is required";
+    }
+
+    if (!formData.lastName.trim()) {
+      errors.lastName = "Last name is required";
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Enter a valid email address";
+    }
+
+    if (!formData.password) {
+      errors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      errors.password = "Password must be at least 8 characters";
+    }
+
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = "Confirm password is required";
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    setFormErrors(errors);
+
+    return !Object.values(errors).some((message) => message !== "");
+  };
+
   const handleRegister = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       setLoading(true);
       setError("");
@@ -45,7 +98,12 @@ function Register() {
             "Content-Type": "application/json",
           },
 
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            password: formData.password,
+          }),
         },
       );
 
@@ -83,6 +141,8 @@ function Register() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.firstName)}
+            helperText={formErrors.firstName}
           />
 
           <TextField
@@ -92,6 +152,8 @@ function Register() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.lastName)}
+            helperText={formErrors.lastName}
           />
 
           <TextField
@@ -102,6 +164,8 @@ function Register() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.email)}
+            helperText={formErrors.email}
           />
 
           <TextField
@@ -112,6 +176,8 @@ function Register() {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            error={Boolean(formErrors.password)}
+            helperText={formErrors.password}
           />
 
           <TextField
@@ -119,6 +185,11 @@ function Register() {
             type="password"
             fullWidth
             margin="normal"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            error={Boolean(formErrors.confirmPassword)}
+            helperText={formErrors.confirmPassword}
           />
           {error && (
             <Typography color="error" sx={{ mt: 1 }}>
@@ -132,7 +203,7 @@ function Register() {
             onClick={handleRegister}
             disabled={loading}
           >
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading ? "Creating Account..." : "Create Account"}
           </Button>
         </Paper>
       </Box>
