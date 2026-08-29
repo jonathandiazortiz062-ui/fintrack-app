@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Grid,
   IconButton,
@@ -29,6 +30,8 @@ function Accounts() {
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const [editingAccountId, setEditingAccountId] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [accountToDelete, setAccountToDelete] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -84,6 +87,16 @@ function Accounts() {
     });
 
     setOpen(true);
+  };
+
+  const handleOpenDeleteDialog = (accountId) => {
+    setAccountToDelete(accountId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setAccountToDelete(null);
+    setDeleteDialogOpen(false);
   };
 
   // Validations:
@@ -333,7 +346,7 @@ function Accounts() {
                       </IconButton>
 
                       <IconButton
-                        onClick={() => handleDeleteAccount(account.id)}
+                        onClick={() => handleOpenDeleteDialog(account)}
                         aria-label="delete account"
                       >
                         <DeleteIcon />
@@ -341,7 +354,18 @@ function Accounts() {
                     </Box>
                   </Box>
 
-                  <Typography variant="h5" sx={{ mt: 2 }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      mt: 2,
+                      color:
+                        Number(account.balance) < 0
+                          ? "error.main"
+                          : Number(account.balance) > 0
+                            ? "success.main"
+                            : "text.primary",
+                    }}
+                  >
                     ${Number(account.balance).toFixed(2)}
                   </Typography>
                 </CardContent>
@@ -411,6 +435,35 @@ function Accounts() {
             }
           >
             {editingAccountId ? "Save Changes" : "Save Account"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Delete Account?</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to remove{" "}
+            <strong>{accountToDelete?.name}</strong>? The account will no longer
+            appear in your active accounts, but its previous transactions will
+            remain in your financial history.
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+
+          <Button
+            color="error"
+            onClick={() => {
+              if (accountToDelete) {
+                handleDeleteAccount(accountToDelete.id);
+                handleCloseDeleteDialog();
+              }
+            }}
+          >
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

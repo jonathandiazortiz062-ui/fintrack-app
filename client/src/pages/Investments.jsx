@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   TextField,
   IconButton,
@@ -36,6 +37,9 @@ function Investments() {
   });
 
   const [editingInvestmentId, setEditingInvestmentId] = useState(null);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [investmentToDelete, setInvestmentToDelete] = useState(null);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -80,6 +84,16 @@ function Investments() {
     });
 
     setOpen(true);
+  };
+
+  const handleOpenDeleteDialog = (investment) => {
+    setInvestmentToDelete(investment);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setInvestmentToDelete(null);
   };
 
   //Validations:
@@ -420,7 +434,7 @@ function Investments() {
                     </IconButton>
 
                     <IconButton
-                      onClick={() => handleDeleteInvestment(investment.id)}
+                      onClick={() => handleOpenDeleteDialog(investment)}
                       aria-label="delete investment"
                     >
                       <DeleteIcon />
@@ -587,6 +601,33 @@ function Investments() {
             }
           >
             {editingInvestmentId ? "Save Changes" : "Save Investment"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Delete Investment?</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete your{" "}
+            <strong>{investmentToDelete?.symbol}</strong> investment? This
+            action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+
+          <Button
+            color="error"
+            onClick={() => {
+              if (investmentToDelete) {
+                handleDeleteInvestment(investmentToDelete.id);
+                handleCloseDeleteDialog();
+              }
+            }}
+          >
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

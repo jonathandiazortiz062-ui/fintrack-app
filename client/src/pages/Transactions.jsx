@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Grid,
   MenuItem,
@@ -51,6 +52,9 @@ function Transactions() {
     startDate: "",
     endDate: "",
   });
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -139,6 +143,16 @@ function Transactions() {
     } catch (error) {
       console.error("Error clearing filters:", error);
     }
+  };
+
+  const handleOpenDeleteDialog = (transaction) => {
+    setTransactionToDelete(transaction);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setTransactionToDelete(null);
   };
 
   //Validattions:
@@ -608,7 +622,7 @@ function Transactions() {
                       </IconButton>
 
                       <IconButton
-                        onClick={() => handleDeleteTransaction(transaction.id)}
+                        onClick={() => handleOpenDeleteDialog(transaction)}
                         aria-label="delete transaction"
                       >
                         <DeleteIcon />
@@ -749,6 +763,33 @@ function Transactions() {
             }
           >
             {editingTransactionId ? "Save Changes" : "Save Transaction"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Delete Transaction?</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete{" "}
+            <strong>{transactionToDelete?.description}</strong>? This action
+            cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+
+          <Button
+            color="error"
+            onClick={() => {
+              if (transactionToDelete) {
+                handleDeleteTransaction(transactionToDelete.id);
+                handleCloseDeleteDialog();
+              }
+            }}
+          >
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

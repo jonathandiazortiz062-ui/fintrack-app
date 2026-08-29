@@ -109,10 +109,11 @@ export const createTransaction = async (req, res) => {
 
     const accountCheck = await pool.query(
       `SELECT id
-       FROM accounts
-       WHERE id = $1
-       AND user_id = $2`,
-      [accountId, userId]
+        FROM accounts
+        WHERE id = $1
+        AND user_id = $2
+        AND deleted_at IS NULL`,
+        [accountId, userId]
     );
 
     if (accountCheck.rows.length === 0) {
@@ -180,9 +181,10 @@ export const updateTransaction = async (req, res) => {
 
     const accountCheck = await pool.query(
       `SELECT id
-       FROM accounts
-       WHERE id = $1
-       AND user_id = $2`,
+        FROM accounts
+        WHERE id = $1
+        AND user_id = $2
+        AND deleted_at IS NULL`,
       [accountId, userId],
     );
 

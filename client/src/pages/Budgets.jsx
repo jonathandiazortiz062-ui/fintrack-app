@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   IconButton,
   LinearProgress,
@@ -39,6 +40,9 @@ function Budgets() {
   });
 
   const [editingBudgetId, setEditingBudgetId] = useState(null);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [budgetToDelete, setBudgetToDelete] = useState(null);
 
   const handleOpen = () => {
     setEditingBudgetId(null);
@@ -78,6 +82,16 @@ function Budgets() {
     setDuplicateError("");
 
     setOpen(true);
+  };
+
+  const handleOpenDeleteDialog = (budget) => {
+    setBudgetToDelete(budget);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setBudgetToDelete(null);
   };
 
   //Validations:
@@ -193,7 +207,9 @@ function Budgets() {
       setOpen(false);
     } catch (error) {
       console.error("Error updating budget:", error);
-      setDuplicateError(error.message || "An error occurred while updating the budget");
+      setDuplicateError(
+        error.message || "An error occurred while updating the budget",
+      );
     }
   };
 
@@ -361,7 +377,7 @@ function Budgets() {
                       </IconButton>
 
                       <IconButton
-                        onClick={() => handleDeleteBudget(budget.id)}
+                        onClick={() => handleOpenDeleteDialog(budget)}
                         aria-label="delete budget"
                       >
                         <DeleteIcon />
@@ -459,6 +475,33 @@ function Budgets() {
             onClick={editingBudgetId ? handleUpdateBudget : handleCreateBudget}
           >
             {editingBudgetId ? "Save Changes" : "Save Budget"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Delete Budget?</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the budget for{" "}
+            <strong>{budgetToDelete?.category_name}</strong>? This action cannot
+            be undone.
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+
+          <Button
+            color="error"
+            onClick={() => {
+              if (budgetToDelete) {
+                handleDeleteBudget(budgetToDelete.id);
+                handleCloseDeleteDialog();
+              }
+            }}
+          >
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
