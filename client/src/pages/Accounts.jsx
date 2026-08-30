@@ -1,8 +1,10 @@
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,6 +13,7 @@ import {
   Grid,
   IconButton,
   MenuItem,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
@@ -32,6 +35,11 @@ function Accounts() {
   const [editingAccountId, setEditingAccountId] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -39,7 +47,7 @@ function Accounts() {
     balance: "",
   });
 
-  //Regular handlers:
+  //Regular handlers and helpers:
   const handleOpen = () => {
     setEditingAccountId(null);
 
@@ -97,6 +105,14 @@ function Accounts() {
   const handleCloseDeleteDialog = () => {
     setAccountToDelete(null);
     setDeleteDialogOpen(false);
+  };
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
   };
 
   // Validations:
@@ -162,6 +178,7 @@ function Accounts() {
       const newAccount = await response.json();
 
       setAccounts((prev) => [...prev, newAccount]);
+      showSnackbar("Account created successfully");
 
       setFormData({
         name: "",
@@ -171,6 +188,7 @@ function Accounts() {
 
       setOpen(false);
     } catch (error) {
+      showSnackbar("Unable to create account", "error");
       console.error("Error creating account:", error);
     }
   };
@@ -209,6 +227,7 @@ function Accounts() {
           account.id === updatedAccount.id ? updatedAccount : account,
         ),
       );
+      showSnackbar("Account updated successfully");
 
       setEditingAccountId(null);
 
@@ -220,6 +239,7 @@ function Accounts() {
 
       setOpen(false);
     } catch (error) {
+      showSnackbar("Unable to update account", "error");
       console.error("Error updating account:", error);
     }
   };
@@ -239,7 +259,9 @@ function Accounts() {
       }
 
       setAccounts((prev) => prev.filter((account) => account.id !== accountId));
+      showSnackbar("Account deleted successfully");
     } catch (error) {
+      showSnackbar("Unable to delete account", "error");
       console.error("Error deleting account:", error);
     }
   };
@@ -271,7 +293,18 @@ function Accounts() {
   }, []);
 
   if (loading) {
-    return <Typography>Loading accounts...</Typography>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "300px",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
@@ -308,11 +341,11 @@ function Accounts() {
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Your Accounts
+              No Accounts Yet
             </Typography>
 
             <Typography color="text.secondary">
-              No accounts have been added yet.
+              Add your first account to begin tracking your finances.
             </Typography>
           </CardContent>
         </Card>
@@ -467,6 +500,33 @@ function Accounts() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() =>
+          setSnackbar((prev) => ({
+            ...prev,
+            open: false,
+          }))
+        }
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() =>
+            setSnackbar((prev) => ({
+              ...prev,
+              open: false,
+            }))
+          }
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

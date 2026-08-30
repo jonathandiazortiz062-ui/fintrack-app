@@ -1,14 +1,17 @@
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Typography,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Snackbar,
   TextField,
   IconButton,
 } from "@mui/material";
@@ -29,6 +32,11 @@ function Investments() {
   const [error, setError] = useState("");
 
   const [open, setOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const [formData, setFormData] = useState({
     symbol: "",
@@ -40,6 +48,8 @@ function Investments() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [investmentToDelete, setInvestmentToDelete] = useState(null);
+
+  //Helpers:
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -94,6 +104,14 @@ function Investments() {
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setInvestmentToDelete(null);
+  };
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
   };
 
   //Validations:
@@ -175,8 +193,10 @@ function Investments() {
       });
 
       setOpen(false);
+      showSnackbar("Investment created successfully");
     } catch (error) {
       console.error("Error creating investment:", error);
+      showSnackbar(error.message || "Failed to create investment", "error");
     }
   };
 
@@ -219,8 +239,10 @@ function Investments() {
       });
 
       setOpen(false);
+      showSnackbar("Investment updated successfully");
     } catch (error) {
       console.error("Error updating investment:", error);
+      showSnackbar(error.message || "Failed to update investment", "error");
     }
   };
 
@@ -243,8 +265,10 @@ function Investments() {
       setInvestments((prev) =>
         prev.filter((investment) => investment.id !== investmentId),
       );
+      showSnackbar("Investment deleted successfully");
     } catch (error) {
       console.error("Error deleting investment:", error);
+      showSnackbar("Investment created successfully");
     }
   };
 
@@ -279,7 +303,18 @@ function Investments() {
   }, []);
 
   if (loading) {
-    return <Typography>Loading investments...</Typography>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "300px",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
@@ -385,11 +420,11 @@ function Investments() {
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Your Investments
+              No Investments Yet
             </Typography>
 
             <Typography color="text.secondary">
-              No investments have been added yet.
+              Add your first investment to begin tracking your portfolio.
             </Typography>
           </CardContent>
         </Card>
@@ -631,6 +666,33 @@ function Investments() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() =>
+          setSnackbar((prev) => ({
+            ...prev,
+            open: false,
+          }))
+        }
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() =>
+            setSnackbar((prev) => ({
+              ...prev,
+              open: false,
+            }))
+          }
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -12,6 +14,7 @@ import {
   DialogTitle,
   Grid,
   MenuItem,
+  Snackbar,
   TextField,
   Typography,
   IconButton,
@@ -35,6 +38,12 @@ function Transactions() {
 
   const [open, setOpen] = useState(false);
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
   const [formData, setFormData] = useState({
     accountId: "",
     categoryId: "",
@@ -55,6 +64,8 @@ function Transactions() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
+
+  //Helpers:
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -155,6 +166,14 @@ function Transactions() {
     setTransactionToDelete(null);
   };
 
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
   //Validattions:
   const [formErrors, setFormErrors] = useState({
     accountId: "",
@@ -250,10 +269,12 @@ function Transactions() {
         transactionType: "",
         transactionDate: "",
       });
+      showSnackbar("Transaction created successfully");
 
       setOpen(false);
     } catch (error) {
       console.error("Error creating transaction:", error);
+      showSnackbar("Failed to create transaction", "error");
     }
   };
 
@@ -308,8 +329,10 @@ function Transactions() {
       });
 
       setOpen(false);
+      showSnackbar("Transaction updated successfully");
     } catch (error) {
       console.error("Error updating transaction:", error);
+      showSnackbar("Failed to update transaction", "error");
     }
   };
 
@@ -330,8 +353,10 @@ function Transactions() {
       setTransactions((prev) =>
         prev.filter((transaction) => transaction.id !== transactionId),
       );
+      showSnackbar("Transaction deleted successfully");
     } catch (error) {
       console.error("Error deleting transaction:", error);
+      showSnackbar("Failed to delete transaction", "error");
     }
   };
 
@@ -421,7 +446,18 @@ function Transactions() {
   }, []);
 
   if (loading) {
-    return <Typography>Loading transactions...</Typography>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "300px",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
@@ -571,11 +607,12 @@ function Transactions() {
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Recent Transactions
+              No Transactions Yet
             </Typography>
 
             <Typography color="text.secondary">
-              No transactions have been added yet.
+              Add your first transaction to begin tracking your income and
+              expenses.
             </Typography>
           </CardContent>
         </Card>
@@ -597,7 +634,7 @@ function Transactions() {
                         {transaction.description}
                       </Typography>
                       {transaction.account_deleted_at ? (
-                        <Typography sx={{ color: 'text.disabled' }}>
+                        <Typography sx={{ color: "text.disabled" }}>
                           {transaction.account_name} (Deleted Account)
                           {" • "}
                           {transaction.category_name || "Uncategorized"}
@@ -800,6 +837,33 @@ function Transactions() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() =>
+          setSnackbar((prev) => ({
+            ...prev,
+            open: false,
+          }))
+        }
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() =>
+            setSnackbar((prev) => ({
+              ...prev,
+              open: false,
+            }))
+          }
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

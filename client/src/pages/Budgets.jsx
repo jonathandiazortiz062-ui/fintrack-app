@@ -1,8 +1,10 @@
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -10,6 +12,7 @@ import {
   DialogTitle,
   IconButton,
   LinearProgress,
+  Snackbar,
   MenuItem,
   TextField,
   Typography,
@@ -31,6 +34,11 @@ function Budgets() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const [open, setOpen] = useState(false);
 
@@ -44,6 +52,7 @@ function Budgets() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [budgetToDelete, setBudgetToDelete] = useState(null);
 
+  //Helpers:
   const handleOpen = () => {
     setEditingBudgetId(null);
 
@@ -92,6 +101,14 @@ function Budgets() {
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setBudgetToDelete(null);
+  };
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
   };
 
   //Validations:
@@ -161,10 +178,15 @@ function Budgets() {
       });
 
       setOpen(false);
+      showSnackbar("Budget created successfully");
     } catch (error) {
       console.error("Error creating budget:", error);
       setDuplicateError(
         error.message || "An error occurred while creating the budget",
+      );
+      showSnackbar(
+        error.message || "An error occurred while creating the budget",
+        "error",
       );
     }
   };
@@ -205,10 +227,15 @@ function Budgets() {
       });
 
       setOpen(false);
+      showSnackbar("Budget updated successfully");
     } catch (error) {
       console.error("Error updating budget:", error);
       setDuplicateError(
         error.message || "An error occurred while updating the budget",
+      );
+      showSnackbar(
+        error.message || "An error occurred while updating the budget",
+        "error",
       );
     }
   };
@@ -228,8 +255,10 @@ function Budgets() {
       }
 
       setBudgets((prev) => prev.filter((budget) => budget.id !== budgetId));
+      showSnackbar("Budget deleted successfully");
     } catch (error) {
       console.error("Error deleting budget:", error);
+      showSnackbar("Failed to delete budget", "error");
     }
   };
 
@@ -283,7 +312,18 @@ function Budgets() {
   }, []);
 
   if (loading) {
-    return <Typography>Loading budgets...</Typography>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "300px",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
@@ -321,11 +361,12 @@ function Budgets() {
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Your Budgets
+              No Budgets Yet
             </Typography>
 
             <Typography color="text.secondary">
-              No budgets have been created yet.
+              Create your first monthly budget to start tracking spending by
+              category.
             </Typography>
           </CardContent>
         </Card>
@@ -505,6 +546,33 @@ function Budgets() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() =>
+          setSnackbar((prev) => ({
+            ...prev,
+            open: false,
+          }))
+        }
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() =>
+            setSnackbar((prev) => ({
+              ...prev,
+              open: false,
+            }))
+          }
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
