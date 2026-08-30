@@ -1,4 +1,4 @@
-import pool from '../db/db.js';
+import pool from "../db/db.js";
 
 export const getBudgets = async (req, res) => {
   try {
@@ -16,6 +16,7 @@ export const getBudgets = async (req, res) => {
           SUM(
             CASE
               WHEN transactions.transaction_type = 'expense'
+              AND accounts.id IS NOT NULL
               AND DATE_TRUNC('month', transactions.transaction_date)
                   = DATE_TRUNC('month', CURRENT_DATE)
               THEN transactions.amount
@@ -48,16 +49,15 @@ export const getBudgets = async (req, res) => {
         budgets.created_at
 
       ORDER BY categories.name`,
-      [userId]
+      [userId],
     );
 
     res.json(result.rows);
-
   } catch (error) {
-    console.error('Error fetching budgets:', error);
+    console.error("Error fetching budgets:", error);
 
     res.status(500).json({
-      message: 'Unable to retrieve budgets'
+      message: "Unable to retrieve budgets",
     });
   }
 };
@@ -67,14 +67,11 @@ export const createBudget = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const {
-      categoryId,
-      monthlyLimit
-    } = req.body;
+    const { categoryId, monthlyLimit } = req.body;
 
     if (!categoryId || !monthlyLimit) {
       return res.status(400).json({
-        message: 'Category and monthly limit are required'
+        message: "Category and monthly limit are required",
       });
     }
 
@@ -82,12 +79,12 @@ export const createBudget = async (req, res) => {
       `SELECT id
        FROM categories
        WHERE id = $1`,
-      [categoryId]
+      [categoryId],
     );
 
     if (categoryCheck.rows.length === 0) {
       return res.status(404).json({
-        message: 'Category not found'
+        message: "Category not found",
       });
     }
 
@@ -99,26 +96,21 @@ export const createBudget = async (req, res) => {
       )
       VALUES ($1, $2, $3)
       RETURNING *`,
-      [
-        userId,
-        categoryId,
-        monthlyLimit
-      ]
+      [userId, categoryId, monthlyLimit],
     );
 
     res.status(201).json(result.rows[0]);
-
   } catch (error) {
-    console.error('Error creating budget:', error);
+    console.error("Error creating budget:", error);
 
-    if (error.code === '23505') {
+    if (error.code === "23505") {
       return res.status(409).json({
-        message: 'A budget already exists for this category'
+        message: "A budget already exists for this category",
       });
     }
 
     res.status(500).json({
-      message: 'Unable to create budget'
+      message: "Unable to create budget",
     });
   }
 };
@@ -128,14 +120,11 @@ export const updateBudget = async (req, res) => {
     const userId = req.user.id;
     const budgetId = req.params.id;
 
-    const {
-      categoryId,
-      monthlyLimit
-    } = req.body;
+    const { categoryId, monthlyLimit } = req.body;
 
     if (!categoryId || !monthlyLimit) {
       return res.status(400).json({
-        message: 'Category and monthly limit are required'
+        message: "Category and monthly limit are required",
       });
     }
 
@@ -143,12 +132,12 @@ export const updateBudget = async (req, res) => {
       `SELECT id
        FROM categories
        WHERE id = $1`,
-      [categoryId]
+      [categoryId],
     );
 
     if (categoryCheck.rows.length === 0) {
       return res.status(404).json({
-        message: 'Category not found'
+        message: "Category not found",
       });
     }
 
@@ -160,33 +149,27 @@ export const updateBudget = async (req, res) => {
        WHERE id = $3
        AND user_id = $4
        RETURNING *`,
-      [
-        categoryId,
-        monthlyLimit,
-        budgetId,
-        userId
-      ]
+      [categoryId, monthlyLimit, budgetId, userId],
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: 'Budget not found'
+        message: "Budget not found",
       });
     }
 
     res.json(result.rows[0]);
-
   } catch (error) {
-    console.error('Error updating budget:', error);
+    console.error("Error updating budget:", error);
 
-    if (error.code === '23505') {
+    if (error.code === "23505") {
       return res.status(409).json({
-        message: 'A budget already exists for this category'
+        message: "A budget already exists for this category",
       });
     }
 
     res.status(500).json({
-      message: 'Unable to update budget'
+      message: "Unable to update budget",
     });
   }
 };
@@ -201,27 +184,23 @@ export const deleteBudget = async (req, res) => {
        WHERE id = $1
        AND user_id = $2
        RETURNING *`,
-      [
-        budgetId,
-        userId
-      ]
+      [budgetId, userId],
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: 'Budget not found'
+        message: "Budget not found",
       });
     }
 
     res.json({
-      message: 'Budget deleted successfully'
+      message: "Budget deleted successfully",
     });
-
   } catch (error) {
-    console.error('Error deleting budget:', error);
+    console.error("Error deleting budget:", error);
 
     res.status(500).json({
-      message: 'Unable to delete budget'
+      message: "Unable to delete budget",
     });
   }
 };

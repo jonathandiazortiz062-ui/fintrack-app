@@ -596,12 +596,19 @@ function Transactions() {
                       <Typography variant="h6">
                         {transaction.description}
                       </Typography>
-
-                      <Typography color="text.secondary">
-                        {transaction.account_name}
-                        {" • "}
-                        {transaction.category_name || "Uncategorized"}
-                      </Typography>
+                      {transaction.account_deleted_at ? (
+                        <Typography sx={{ color: 'text.disabled' }}>
+                          {transaction.account_name} (Deleted Account)
+                          {" • "}
+                          {transaction.category_name || "Uncategorized"}
+                        </Typography>
+                      ) : (
+                        <Typography color="text.secondary">
+                          {transaction.account_name}
+                          {" • "}
+                          {transaction.category_name || "Uncategorized"}
+                        </Typography>
+                      )}
 
                       <Typography
                         variant="body2"

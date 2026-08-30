@@ -17,6 +17,7 @@ export const getTransactions = async (req, res) => {
         transactions.transaction_date,
         transactions.created_at,
         accounts.name AS account_name,
+        accounts.deleted_at AS account_deleted_at,
         categories.name AS category_name
       FROM transactions
       JOIN accounts
