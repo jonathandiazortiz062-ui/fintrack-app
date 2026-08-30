@@ -316,22 +316,29 @@ function Accounts() {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: {
+            xs: "flex-start",
+            sm: "center",
+          },
+          flexDirection: {
+            xs: "column",
+            sm: "row",
+          },
+          gap: 2,
           mb: 3,
         }}
       >
-        <Box>
-          <Typography variant="h4">Accounts</Typography>
-
-          <Typography color="text.secondary">
-            Manage your financial accounts
-          </Typography>
-        </Box>
+        <Typography variant="h4">Accounts</Typography>
 
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
           onClick={handleOpen}
+          sx={{
+            width: {
+              xs: "100%",
+              sm: "auto",
+            },
+          }}
         >
           Add Account
         </Button>
@@ -359,7 +366,15 @@ function Accounts() {
                     sx={{
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: "flex-start",
+                      alignItems: {
+                        xs: "flex-start",
+                        sm: "center",
+                      },
+                      flexDirection: {
+                        xs: "column",
+                        sm: "row",
+                      },
+                      gap: 2,
                     }}
                   >
                     <Box>
@@ -370,7 +385,15 @@ function Accounts() {
                       </Typography>
                     </Box>
 
-                    <Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignSelf: {
+                          xs: "flex-end",
+                          sm: "center",
+                        },
+                      }}
+                    >
                       <IconButton
                         onClick={() => handleEdit(account)}
                         aria-label="edit account"

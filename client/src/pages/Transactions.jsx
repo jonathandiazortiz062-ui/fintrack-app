@@ -469,22 +469,29 @@ function Transactions() {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: {
+            xs: "flex-start",
+            sm: "center",
+          },
+          flexDirection: {
+            xs: "column",
+            sm: "row",
+          },
+          gap: 2,
           mb: 3,
         }}
       >
-        <Box>
-          <Typography variant="h4">Transactions</Typography>
-
-          <Typography color="text.secondary">
-            Track your income and expenses
-          </Typography>
-        </Box>
+        <Typography variant="h4">Transactions</Typography>
 
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
           onClick={handleOpen}
+          sx={{
+            width: {
+              xs: "100%",
+              sm: "auto",
+            },
+          }}
         >
           Add Transaction
         </Button>
@@ -626,6 +633,10 @@ function Transactions() {
                     sx={{
                       display: "flex",
                       justifyContent: "space-between",
+                      flexDirection: {
+                        xs: "column",
+                        sm: "row",
+                      },
                       gap: 2,
                     }}
                   >
@@ -657,7 +668,24 @@ function Transactions() {
                         ).toLocaleDateString()}
                       </Typography>
                     </Box>
-                    <Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: {
+                          xs: "row",
+                          sm: "column",
+                        },
+                        justifyContent: {
+                          xs: "space-between",
+                          sm: "flex-start",
+                        },
+                        alignItems: {
+                          xs: "center",
+                          sm: "flex-end",
+                        },
+                        gap: 1,
+                      }}
+                    >
                       <IconButton
                         onClick={() => handleEditTransaction(transaction)}
                         aria-label="edit transaction"

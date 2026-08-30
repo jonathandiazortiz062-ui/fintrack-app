@@ -336,22 +336,29 @@ function Budgets() {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: {
+            xs: "flex-start",
+            sm: "center",
+          },
+          flexDirection: {
+            xs: "column",
+            sm: "row",
+          },
+          gap: 2,
           mb: 3,
         }}
       >
-        <Box>
-          <Typography variant="h4">Budgets</Typography>
-
-          <Typography color="text.secondary">
-            Set monthly spending limits
-          </Typography>
-        </Box>
+        <Typography variant="h4">Budgets</Typography>
 
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
           onClick={handleOpen}
+          sx={{
+            width: {
+              xs: "100%",
+              sm: "auto",
+            },
+          }}
         >
           Add Budget
         </Button>
@@ -396,7 +403,8 @@ function Budgets() {
                     sx={{
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: "flex-start",
+                      alignItems: "center",
+                      gap: 2,
                     }}
                   >
                     <Box>
