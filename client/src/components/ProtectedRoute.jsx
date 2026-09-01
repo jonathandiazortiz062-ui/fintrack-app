@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { apiFetch } from '../../utils/api.js';
 
 function ProtectedRoute() {
   const [authenticated, setAuthenticated] = useState(null);
@@ -7,12 +8,9 @@ function ProtectedRoute() {
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/auth/me`,
-          {
-            credentials: 'include'
-          }
-        );
+        const response = await apiFetch("/api/auth/me", {
+          credentials: 'include'
+        });
 
         setAuthenticated(response.ok);
 

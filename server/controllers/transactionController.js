@@ -108,6 +108,17 @@ export const createTransaction = async (req, res) => {
       });
     }
 
+    const dateCheck = await pool.query(
+      `SELECT $1::date <= CURRENT_DATE AS is_valid`,
+      [transactionDate]
+    );
+
+    if (!dateCheck.rows[0].is_valid) {
+      return res.status(400).json({
+        message: "Transaction date cannot be in the future",
+      });
+    }
+
     const accountCheck = await pool.query(
       `SELECT id
         FROM accounts
@@ -177,6 +188,17 @@ export const updateTransaction = async (req, res) => {
     ) {
       return res.status(400).json({
         message: "Required transaction fields are missing",
+      });
+    }
+
+    const dateCheck = await pool.query(
+      `SELECT $1::date <= CURRENT_DATE AS is_valid`,
+      [transactionDate]
+    );
+
+    if (!dateCheck.rows[0].is_valid) {
+      return res.status(400).json({
+        message: "Transaction date cannot be in the future",
       });
     }
 

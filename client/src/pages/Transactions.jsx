@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../utils/api.js";
 
 import {
   Alert,
@@ -20,7 +21,6 @@ import {
   IconButton,
 } from "@mui/material";
 
-import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -174,6 +174,16 @@ function Transactions() {
     });
   };
 
+  const getTodayDate = () => {
+    const today = new Date();
+
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   //Validattions:
   const [formErrors, setFormErrors] = useState({
     accountId: "",
@@ -191,6 +201,7 @@ function Transactions() {
       transactionType: "",
       transactionDate: "",
     };
+    const today = getTodayDate();
 
     if (!formData.accountId) {
       errors.accountId = "Account is required";
@@ -217,6 +228,10 @@ function Transactions() {
       errors.transactionDate = "Transaction date is required";
     }
 
+    if (formData.transactionDate > today) {
+      errors.transactionDate = "Transaction date cannot be in the future.";
+    }
+
     setFormErrors(errors);
 
     return !Object.values(errors).some((message) => message !== "");
@@ -228,32 +243,20 @@ function Transactions() {
       return;
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/transactions`,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            accountId: Number(formData.accountId),
-
-            categoryId: formData.categoryId
-              ? Number(formData.categoryId)
-              : null,
-
-            description: formData.description,
-
-            amount: Number(formData.amount),
-
-            transactionType: formData.transactionType,
-
-            transactionDate: formData.transactionDate,
-          }),
+      const response = await apiFetch("/api/transactions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          accountId: Number(formData.accountId),
+          categoryId: formData.categoryId ? Number(formData.categoryId) : null,
+          description: formData.description,
+          amount: Number(formData.amount),
+          transactionType: formData.transactionType,
+          transactionDate: formData.transactionDate,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to create transaction");
@@ -283,29 +286,21 @@ function Transactions() {
       return;
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/transactions/${editingTransactionId}`,
+      const response = await apiFetch(
+        `/api/transactions/${editingTransactionId}`,
         {
           method: "PUT",
-
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
-
           body: JSON.stringify({
             accountId: Number(formData.accountId),
-
             categoryId: formData.categoryId
               ? Number(formData.categoryId)
               : null,
-
             description: formData.description,
-
             amount: Number(formData.amount),
-
             transactionType: formData.transactionType,
-
             transactionDate: formData.transactionDate,
           }),
         },
@@ -338,13 +333,9 @@ function Transactions() {
 
   const handleDeleteTransaction = async (transactionId) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/transactions/${transactionId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const response = await apiFetch(`/api/transactions/${transactionId}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete transaction");
@@ -385,11 +376,11 @@ function Transactions() {
 
     const queryString = params.toString();
 
-    const url = queryString
-      ? `${import.meta.env.VITE_API_URL}/api/transactions?${queryString}`
-      : `${import.meta.env.VITE_API_URL}/api/transactions`;
+    const endpoint = queryString
+      ? `/api/transactions?${queryString}`
+      : "/api/transactions";
 
-    const response = await fetch(url, { credentials: "include" });
+    const response = await apiFetch(endpoint);
 
     if (!response.ok) {
       throw new Error("Failed to fetch transactions");
@@ -405,15 +396,9 @@ function Transactions() {
       try {
         const [transactionsResponse, accountsResponse, categoriesResponse] =
           await Promise.all([
-            fetch(`${import.meta.env.VITE_API_URL}/api/transactions`, {
-              credentials: "include",
-            }),
-            fetch(`${import.meta.env.VITE_API_URL}/api/accounts`, {
-              credentials: "include",
-            }),
-            fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
-              credentials: "include",
-            }),
+            apiFetch("/api/transactions"),
+            apiFetch("/api/accounts"),
+            apiFetch("/api/categories"),
           ]);
 
         if (
@@ -812,6 +797,9 @@ function Transactions() {
             value={formData.transactionDate}
             onChange={handleChange}
             fullWidth
+            inputProps={{
+              max: getTodayDate(),
+            }}
             margin="normal"
             error={Boolean(formErrors.transactionDate)}
             helperText={formErrors.transactionDate}

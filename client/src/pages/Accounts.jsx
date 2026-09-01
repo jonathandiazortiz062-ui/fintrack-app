@@ -17,7 +17,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { apiFetch } from "../../utils/api";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -154,22 +154,17 @@ function Accounts() {
       return;
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/accounts`,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
+      const response = await apiFetch("/api/accounts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
             name: formData.name,
             accountType: formData.accountType,
             balance: Number(formData.balance),
           }),
-        },
-      );
+      });
 
       if (!response.ok) {
         throw new Error("Failed to create account");
@@ -198,23 +193,18 @@ function Accounts() {
       return;
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/accounts/${editingAccountId}`,
-        {
-          method: "PUT",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-
-          body: JSON.stringify({
-            name: formData.name,
-            accountType: formData.accountType,
-            balance: Number(formData.balance),
-          }),
+      const response = await apiFetch(`/api/accounts/${editingAccountId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          name: formData.name,
+          accountType: formData.accountType,
+          balance: Number(formData.balance),
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to update account");
@@ -246,13 +236,9 @@ function Accounts() {
 
   const handleDeleteAccount = async (accountId) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/accounts/${accountId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const response = await apiFetch(`/api/accounts/${accountId}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete account");
@@ -269,10 +255,7 @@ function Accounts() {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/accounts`,
-          { credentials: "include" },
-        );
+        const response = await apiFetch("/api/accounts");
 
         if (!response.ok) {
           throw new Error("Failed to fetch accounts");

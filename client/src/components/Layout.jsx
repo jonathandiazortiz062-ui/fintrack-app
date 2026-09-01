@@ -22,6 +22,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 
 import { Link, Outlet } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../utils/api.js";
 
 const drawerWidth = 240;
 
@@ -29,13 +30,9 @@ function Layout() {
   const navigate = useNavigate();
   const handleLogout = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/auth/logout`,
-        {
-          method: "POST",
-          credentials: "include",
-        },
-      );
+      const response = await apiFetch("/api/auth/logout", {
+        method: "POST",
+      });
 
       if (!response.ok) {
         throw new Error("Unable to log out");

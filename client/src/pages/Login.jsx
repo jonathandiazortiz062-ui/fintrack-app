@@ -9,6 +9,7 @@ import {
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../utils/api.js";
 
 function Login() {
   const navigate = useNavigate();
@@ -66,23 +67,16 @@ function Login() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          credentials: "include",
-
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
+      const response = await apiFetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
       const data = await response.json();
 

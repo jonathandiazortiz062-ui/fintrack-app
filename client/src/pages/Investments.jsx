@@ -18,13 +18,12 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import AddIcon from "@mui/icons-material/Add";
-
 //We are using the same layout for all of our pages, so we can just copy and paste the code from the Budgets page and change the text to match the Investments page. However,
 // we will create reusable components for the cards, buttons, and other UI elements so that we can use them on other pages as well.
 // This will make our code more maintainable and easier to read.
 
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../utils/api.js";
 
 function Investments() {
   const [investments, setInvestments] = useState([]);
@@ -161,22 +160,17 @@ function Investments() {
       return;
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/investments`,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            symbol: formData.symbol,
-            quantity: Number(formData.quantity),
-            purchasePrice: Number(formData.purchasePrice),
-          }),
+      const response = await apiFetch("/api/investments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          symbol: formData.symbol,
+          quantity: Number(formData.quantity),
+          purchasePrice: Number(formData.purchasePrice),
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -205,22 +199,17 @@ function Investments() {
       return;
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/investments/${editingInvestmentId}`,
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            symbol: formData.symbol,
-            quantity: Number(formData.quantity),
-            purchasePrice: Number(formData.purchasePrice),
-          }),
+      const response = await apiFetch(`/api/investments/${editingInvestmentId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          symbol: formData.symbol,
+          quantity: Number(formData.quantity),
+          purchasePrice: Number(formData.purchasePrice),
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -248,13 +237,9 @@ function Investments() {
 
   const handleDeleteInvestment = async (investmentId) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/investments/${investmentId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const response = await apiFetch(`/api/investments/${investmentId}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -273,10 +258,8 @@ function Investments() {
   };
 
   const fetchInvestments = async () => {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/investments`,
-      { credentials: "include" },
-    );
+
+    const response = await apiFetch("/api/investments");
 
     if (!response.ok) {
       throw new Error("Failed to fetch investments");

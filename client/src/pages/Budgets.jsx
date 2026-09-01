@@ -21,13 +21,12 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import AddIcon from "@mui/icons-material/Add";
-
 //We are using the same layout for all of our pages, so we can just copy and paste the code from the Budgets page and change the text to match the Investments page. However,
 // we will create reusable components for the cards, buttons, and other UI elements so that we can use them on other pages as well.
 // This will make our code more maintainable and easier to read.
 
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../utils/api.js";
 
 function Budgets() {
   const [budgets, setBudgets] = useState([]);
@@ -51,6 +50,21 @@ function Budgets() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [budgetToDelete, setBudgetToDelete] = useState(null);
+  
+  const today = new Date();
+
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  const formatDate = (date) =>
+    date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+
+  const budgetPeriod = `${formatDate(firstDayOfMonth)} – ${formatDate(lastDayOfMonth)}`;
 
   //Helpers:
   const handleOpen = () => {
@@ -143,26 +157,21 @@ function Budgets() {
   };
 
   //CRUD:
-  const handleCreateBudget = async (req, res) => {
+  const handleCreateBudget = async () => {
     if (!validateForm()) {
       return;
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/budgets`,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            categoryId: Number(formData.categoryId),
-            monthlyLimit: Number(formData.monthlyLimit),
-          }),
+      const response = await apiFetch("/api/budgets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          categoryId: Number(formData.categoryId),
+          monthlyLimit: Number(formData.monthlyLimit),
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -196,20 +205,16 @@ function Budgets() {
       return;
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/budgets/${editingBudgetId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            categoryId: Number(formData.categoryId),
-            monthlyLimit: Number(formData.monthlyLimit),
-          }),
+      const response = await apiFetch(`/api/budgets/${editingBudgetId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          categoryId: Number(formData.categoryId),
+          monthlyLimit: Number(formData.monthlyLimit),
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -242,13 +247,9 @@ function Budgets() {
 
   const handleDeleteBudget = async (budgetId) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/budgets/${budgetId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const response = await apiFetch(`/api/budgets/${budgetId}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete budget");
@@ -263,10 +264,7 @@ function Budgets() {
   };
 
   const fetchBudgets = async () => {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/budgets`,
-      { credentials: "include" },
-    );
+    const response = await apiFetch("/api/budgets");
 
     if (!response.ok) {
       throw new Error("Failed to fetch budgets");
@@ -281,12 +279,8 @@ function Budgets() {
     const fetchData = async () => {
       try {
         const [budgetsResponse, categoriesResponse] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/budgets`, {
-            credentials: "include",
-          }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
-            credentials: "include",
-          }),
+          apiFetch("/api/budgets"),
+          apiFetch("/api/categories"),
         ]);
 
         if (!budgetsResponse.ok || !categoriesResponse.ok) {
@@ -297,7 +291,6 @@ function Budgets() {
           budgetsResponse.json(),
           categoriesResponse.json(),
         ]);
-
         setBudgets(budgetsData);
         setCategories(categoriesData);
       } catch (error) {
@@ -363,6 +356,13 @@ function Budgets() {
           Add Budget
         </Button>
       </Box>
+      <Typography
+  variant="body2"
+  color="text.secondary"
+  sx={{ mb: 3 }}
+>
+  Budget period: {budgetPeriod}
+</Typography>
 
       {budgets.length === 0 ? (
         <Card>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../utils/api.js";
 import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 
 function Dashboard() {
@@ -12,14 +13,14 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [recentTransactions, setRecentTransactions] = useState([]);
+  const currentMonth = new Date().toLocaleDateString("en-US", {
+    month: "long",
+  });
 
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/dashboard/summary`,
-          { credentials: "include" },
-        );
+        const response = await apiFetch("/api/dashboard/summary");
 
         if (!response.ok) {
           throw new Error("Failed to fetch dashboard summary");
@@ -38,10 +39,7 @@ function Dashboard() {
 
     const fetchRecentTransactions = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/transactions`,
-          { credentials: "include" },
-        );
+        const response = await apiFetch("/api/transactions");
 
         if (!response.ok) {
           throw new Error("Failed to fetch recent transactions");
@@ -58,7 +56,6 @@ function Dashboard() {
 
     fetchRecentTransactions();
     fetchSummary();
-
   }, []);
 
   if (loading) {
@@ -83,7 +80,7 @@ function Dashboard() {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
-              <Typography color="text.secondary">Balance</Typography>
+              <Typography color="text.secondary">Total Balance</Typography>
 
               <Typography variant="h5">
                 ${Number(summary.totalBalance).toFixed(2)}
@@ -95,7 +92,7 @@ function Dashboard() {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
-              <Typography color="text.secondary">Income</Typography>
+              <Typography color="text.secondary">{currentMonth} Income</Typography>
 
               <Typography variant="h5">
                 ${Number(summary.monthlyIncome).toFixed(2)}
@@ -107,7 +104,7 @@ function Dashboard() {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
-              <Typography color="text.secondary">Expenses</Typography>
+              <Typography color="text.secondary">{currentMonth} Expenses</Typography>
 
               <Typography variant="h5">
                 ${Number(summary.monthlyExpenses).toFixed(2)}
@@ -119,7 +116,7 @@ function Dashboard() {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
-              <Typography color="text.secondary">Investments</Typography>
+              <Typography color="text.secondary">Total Investments</Typography>
 
               <Typography variant="h5">
                 ${Number(summary.totalInvestmentValue).toFixed(2)}
@@ -137,28 +134,30 @@ function Dashboard() {
           {recentTransactions.map((transaction) => (
             <Card key={transaction.id} sx={{ mb: 1 }}>
               <CardContent>
-                <Typography variant="h6">
-                        {transaction.description}
-                      </Typography>
+                <Typography variant="h6">{transaction.description}</Typography>
 
-                      <Typography color="text.secondary">
-                        {transaction.account_name}
-                        {" • "}
-                        {transaction.category_name || "Uncategorized"}
-                      </Typography>
-                      <Typography color={transaction.transaction_type === "income" ? "success" : "error"}>
-                        {transaction.transaction_type === "income" ? "+" : "-"}$
-                        {Number(transaction.amount).toFixed(2)}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mt: 1 }}
-                      >
-                        {new Date(
-                          transaction.transaction_date,
-                        ).toLocaleDateString()}
-                      </Typography>
+                <Typography color="text.secondary">
+                  {transaction.account_name}
+                  {" • "}
+                  {transaction.category_name || "Uncategorized"}
+                </Typography>
+                <Typography
+                  color={
+                    transaction.transaction_type === "income"
+                      ? "success"
+                      : "error"
+                  }
+                >
+                  {transaction.transaction_type === "income" ? "+" : "-"}$
+                  {Number(transaction.amount).toFixed(2)}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: 1 }}
+                >
+                  {new Date(transaction.transaction_date).toLocaleDateString()}
+                </Typography>
               </CardContent>
             </Card>
           ))}
