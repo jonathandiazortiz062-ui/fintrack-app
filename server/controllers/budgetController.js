@@ -88,6 +88,14 @@ export const createBudget = async (req, res) => {
       });
     }
 
+    const numericMonthlyLimit = Number(monthlyLimit);
+
+    if (Number.isNaN(numericMonthlyLimit) || numericMonthlyLimit <= 0) {
+      return res.status(400).json({
+        message: "Monthly limit must be a valid number greater than zero",
+      });
+    }
+
     const result = await pool.query(
       `INSERT INTO budgets (
         user_id,
@@ -96,7 +104,7 @@ export const createBudget = async (req, res) => {
       )
       VALUES ($1, $2, $3)
       RETURNING *`,
-      [userId, categoryId, monthlyLimit],
+      [userId, categoryId, numericMonthlyLimit],
     );
 
     res.status(201).json(result.rows[0]);
@@ -141,6 +149,14 @@ export const updateBudget = async (req, res) => {
       });
     }
 
+    const numericMonthlyLimit = Number(monthlyLimit);
+
+    if (Number.isNaN(numericMonthlyLimit) || numericMonthlyLimit <= 0) {
+      return res.status(400).json({
+        message: "Monthly limit must be a valid number greater than zero",
+      });
+    }
+
     const result = await pool.query(
       `UPDATE budgets
        SET
@@ -149,7 +165,7 @@ export const updateBudget = async (req, res) => {
        WHERE id = $3
        AND user_id = $4
        RETURNING *`,
-      [categoryId, monthlyLimit, budgetId, userId],
+      [categoryId, numericMonthlyLimit, budgetId, userId],
     );
 
     if (result.rows.length === 0) {

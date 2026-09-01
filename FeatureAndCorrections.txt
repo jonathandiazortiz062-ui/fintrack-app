@@ -2,9 +2,6 @@ Things you need to add or fix after first deployement:
 
 1.) Make accounts balances increase/decrease based on transactions against those accounts.
 
-2.) Make budgets operate for time intervals of 1 month and renew after the next month. 
-Allow user to duplicate bugets for different momnths.
-
 3.) Add graphs of expenses and incomes example (monthly income vs. expense) (month to month expense by category), etc.
 
 4.) An area where you can create a sheet that allows you to write 

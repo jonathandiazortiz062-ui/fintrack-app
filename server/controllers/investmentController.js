@@ -1,6 +1,40 @@
 import pool from "../db/db.js";
 import { fetchStockQuote } from "../services/marketService.js";
 
+//Validation:
+const validateTickerSymbol = async (symbol) => {
+  const normalizedSymbol = symbol.trim().toUpperCase();
+
+  const url =
+    `https://www.alphavantage.co/query` +
+    `?function=GLOBAL_QUOTE` +
+    `&symbol=${encodeURIComponent(normalizedSymbol)}` +
+    `&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Market data service unavailable");
+  }
+
+  const data = await response.json();
+
+  // Alpha Vantage may return these when the request
+  // cannot be processed normally.
+  if (data.Note || data.Information || data["Error Message"]) {
+    throw new Error("MARKET_DATA_UNAVAILABLE");
+  }
+
+  const quote = data["Global Quote"];
+
+  const isValid = quote && Object.keys(quote).length > 0 && quote["01. symbol"];
+
+  return {
+    isValid: Boolean(isValid),
+    symbol: normalizedSymbol,
+  };
+};
+
 export const getInvestments = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -89,6 +123,20 @@ export const createInvestment = async (req, res) => {
       });
     }
 
+    if(Number(quantity) <= 0 || Number(purchasePrice) <= 0) {
+      return res.status(400).json({
+        message: "Quantity and purchase price must be greater than zero",
+      });
+    }
+
+    const tickerValidation = await validateTickerSymbol(symbol);
+
+    if (!tickerValidation.isValid) {
+      return res.status(400).json({
+        message: "Invalid stock symbol",
+      });
+    }
+
     const result = await pool.query(
       `INSERT INTO investments (
         user_id,
@@ -98,16 +146,23 @@ export const createInvestment = async (req, res) => {
        )
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [userId, symbol.toUpperCase(), quantity, purchasePrice],
+      [userId, tickerValidation.symbol, quantity, purchasePrice],
     );
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error("Error creating investment:", error);
+  console.error("Error creating investment:", error);
 
-    res.status(500).json({
-      message: "Unable to create investment",
+  if (error.message === "MARKET_DATA_UNAVAILABLE") {
+    return res.status(503).json({
+      message:
+        "Unable to validate stock symbol. Please try again later.",
     });
+  }
+
+  res.status(500).json({
+    message: "Unable to create investment",
+  });
   }
 };
 
@@ -124,6 +179,19 @@ export const updateInvestment = async (req, res) => {
       });
     }
 
+    if (Number(quantity) <= 0 || Number(purchasePrice) <= 0) {
+      return res.status(400).json({
+        message: "Quantity and purchase price must be greater than zero",
+      });
+    }
+    const tickerValidation = await validateTickerSymbol(symbol);
+
+    if (!tickerValidation.isValid) {
+      return res.status(400).json({
+        message: "Invalid stock symbol",
+      });
+    }
+
     const result = await pool.query(
       `UPDATE investments
        SET
@@ -133,7 +201,7 @@ export const updateInvestment = async (req, res) => {
        WHERE id = $4
        AND user_id = $5
        RETURNING *`,
-      [symbol.toUpperCase(), quantity, purchasePrice, investmentId, userId],
+      [tickerValidation.symbol, quantity, purchasePrice, investmentId, userId],
     );
 
     if (result.rows.length === 0) {
@@ -145,6 +213,13 @@ export const updateInvestment = async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error("Error updating investment:", error);
+
+    if (error.message === "MARKET_DATA_UNAVAILABLE") {
+      return res.status(503).json({
+        message:
+          "Unable to validate stock symbol. Please try again later.",
+      });
+    }
 
     res.status(500).json({
       message: "Unable to update investment",

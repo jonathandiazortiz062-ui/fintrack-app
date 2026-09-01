@@ -62,6 +62,20 @@ export const createAccount = async (req, res) => {
       });
     }
 
+    const allowedAccountTypes = ["checking", "savings", "credit", "cash"];
+
+    if (!allowedAccountTypes.includes(accountType)) {
+      return res.status(400).json({
+        message: "Invalid account type",
+      });
+    }
+
+    if (balance !== undefined && Number.isNaN(Number(balance))) {
+      return res.status(400).json({
+        message: "Balance must be a valid number",
+      });
+    }
+
     const result = await pool.query(
       `INSERT INTO accounts (
         user_id,
@@ -94,6 +108,19 @@ export const updateAccount = async (req, res) => {
     if (!name || !accountType) {
       return res.status(400).json({
         message: "Name and account type are required",
+      });
+    }
+
+    const allowedAccountTypes = ["checking", "savings", "credit", "cash"];
+
+    if (!allowedAccountTypes.includes(accountType)) {
+      return res.status(400).json({
+        message: "Invalid account type",
+      });
+    }
+    if (balance !== undefined && Number.isNaN(Number(balance))) {
+      return res.status(400).json({
+        message: "Balance must be a valid number",
       });
     }
 

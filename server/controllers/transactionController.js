@@ -108,14 +108,28 @@ export const createTransaction = async (req, res) => {
       });
     }
 
+    const allowedTransactionTypes = ["income", "expense"];
+
+    if (!allowedTransactionTypes.includes(transactionType)) {
+      return res.status(400).json({
+        message: "Transaction type must be either income or expense",
+      });
+    }
+
     const dateCheck = await pool.query(
       `SELECT $1::date <= CURRENT_DATE AS is_valid`,
-      [transactionDate]
+      [transactionDate],
     );
 
     if (!dateCheck.rows[0].is_valid) {
       return res.status(400).json({
         message: "Transaction date cannot be in the future",
+      });
+    }
+
+    if (Number(amount) <= 0) {
+      return res.status(400).json({
+        message: "Transaction amount must be greater than zero",
       });
     }
 
@@ -125,7 +139,7 @@ export const createTransaction = async (req, res) => {
         WHERE id = $1
         AND user_id = $2
         AND deleted_at IS NULL`,
-        [accountId, userId]
+      [accountId, userId],
     );
 
     if (accountCheck.rows.length === 0) {
@@ -191,14 +205,28 @@ export const updateTransaction = async (req, res) => {
       });
     }
 
+    const allowedTransactionTypes = ["income", "expense"];
+
+    if (!allowedTransactionTypes.includes(transactionType)) {
+      return res.status(400).json({
+        message: "Transaction type must be either income or expense",
+      });
+    }
+
     const dateCheck = await pool.query(
       `SELECT $1::date <= CURRENT_DATE AS is_valid`,
-      [transactionDate]
+      [transactionDate],
     );
 
     if (!dateCheck.rows[0].is_valid) {
       return res.status(400).json({
         message: "Transaction date cannot be in the future",
+      });
+    }
+
+    if (Number(amount) <= 0) {
+      return res.status(400).json({
+        message: "Transaction amount must be greater than zero",
       });
     }
 
