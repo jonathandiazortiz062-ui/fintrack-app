@@ -14,7 +14,7 @@ const validateTickerSymbol = async (symbol) => {
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error("Market data service unavailable");
+    throw new Error("MARKET_DATA_UNAVAILABLE");
   }
 
   const data = await response.json();
@@ -123,7 +123,15 @@ export const createInvestment = async (req, res) => {
       });
     }
 
-    if(Number(quantity) <= 0 || Number(purchasePrice) <= 0) {
+    const numericQuantity = Number(quantity);
+    const numericPurchasePrice = Number(purchasePrice);
+
+    if (
+      Number.isNaN(numericQuantity) ||
+      Number.isNaN(numericPurchasePrice) ||
+      numericQuantity <= 0 ||
+      numericPurchasePrice <= 0
+    ) {
       return res.status(400).json({
         message: "Quantity and purchase price must be greater than zero",
       });
@@ -146,23 +154,22 @@ export const createInvestment = async (req, res) => {
        )
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [userId, tickerValidation.symbol, quantity, purchasePrice],
+      [userId, tickerValidation.symbol, numericQuantity, numericPurchasePrice],
     );
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
-  console.error("Error creating investment:", error);
+    console.error("Error creating investment:", error);
 
-  if (error.message === "MARKET_DATA_UNAVAILABLE") {
-    return res.status(503).json({
-      message:
-        "Unable to validate stock symbol. Please try again later.",
+    if (error.message === "MARKET_DATA_UNAVAILABLE") {
+      return res.status(503).json({
+        message: "Unable to validate stock symbol. Please try again later.",
+      });
+    }
+
+    res.status(500).json({
+      message: "Unable to create investment",
     });
-  }
-
-  res.status(500).json({
-    message: "Unable to create investment",
-  });
   }
 };
 
@@ -179,7 +186,15 @@ export const updateInvestment = async (req, res) => {
       });
     }
 
-    if (Number(quantity) <= 0 || Number(purchasePrice) <= 0) {
+    const numericQuantity = Number(quantity);
+    const numericPurchasePrice = Number(purchasePrice);
+
+    if (
+      Number.isNaN(numericQuantity) ||
+      Number.isNaN(numericPurchasePrice) ||
+      numericQuantity <= 0 ||
+      numericPurchasePrice <= 0
+    ) {
       return res.status(400).json({
         message: "Quantity and purchase price must be greater than zero",
       });
@@ -201,7 +216,13 @@ export const updateInvestment = async (req, res) => {
        WHERE id = $4
        AND user_id = $5
        RETURNING *`,
-      [tickerValidation.symbol, quantity, purchasePrice, investmentId, userId],
+      [
+        tickerValidation.symbol,
+        numericQuantity,
+        numericPurchasePrice,
+        investmentId,
+        userId,
+      ],
     );
 
     if (result.rows.length === 0) {
@@ -216,8 +237,7 @@ export const updateInvestment = async (req, res) => {
 
     if (error.message === "MARKET_DATA_UNAVAILABLE") {
       return res.status(503).json({
-        message:
-          "Unable to validate stock symbol. Please try again later.",
+        message: "Unable to validate stock symbol. Please try again later.",
       });
     }
 

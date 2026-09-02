@@ -31,7 +31,8 @@ export const getAccountById = async (req, res) => {
       `SELECT *
        FROM accounts
        WHERE id = $1
-       AND user_id = $2`,
+       AND user_id = $2
+       AND deleted_at IS NULL`,
       [accountId, userId],
     );
 
@@ -132,6 +133,7 @@ export const updateAccount = async (req, res) => {
          balance = $3
        WHERE id = $4
        AND user_id = $5
+       AND deleted_at IS NULL
        RETURNING *`,
       [name, accountType, balance ?? 0, accountId, userId],
     );
