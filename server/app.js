@@ -14,12 +14,13 @@ import authRoutes from "./routes/authRoutes.js";
 import cookieParser from "cookie-parser";
 
 const app = express();
+const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 
 app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: clientUrl,
     credentials: true,
   }),
 );
@@ -46,6 +47,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+if (process.env.NODE_ENV !== "production") {
 app.get("/api/db-test", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
@@ -63,5 +65,6 @@ app.get("/api/db-test", async (req, res) => {
     });
   }
 });
+}
 
 export default app;

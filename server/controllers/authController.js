@@ -2,6 +2,14 @@ import bcrypt from "bcrypt";
 import pool from "../db/db.js";
 import jwt from "jsonwebtoken";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+};
+
 export const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
@@ -120,9 +128,7 @@ export const login = async (req, res) => {
     );
 
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      ...cookieOptions,
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -180,11 +186,8 @@ export const getCurrentUser = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
+  res.clearCookie("token", cookieOptions);
+  
 
   res.json({
     message: "Logged out successfully",
