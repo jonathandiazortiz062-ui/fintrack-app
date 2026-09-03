@@ -33,6 +33,8 @@ FinTrack uses a full-stack JavaScript architecture with PostgreSQL for persisten
 
 ### Frontend
 
+- Frontend: https://fintrack-app-opal.vercel.app
+
 - **React** — Component-based user interface
 - **Vite** — Frontend development and build tooling
 - **Material UI (MUI)** — Responsive UI components and styling
@@ -40,6 +42,7 @@ FinTrack uses a full-stack JavaScript architecture with PostgreSQL for persisten
 - **Fetch API** — Communication with the backend REST API
 
 ### Backend
+- Backend API: https://fintrack-api-acda.onrender.com
 
 - **Node.js** — Server-side JavaScript runtime
 - **Express.js** — REST API and server routing
