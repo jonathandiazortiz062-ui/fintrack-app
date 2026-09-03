@@ -18,8 +18,6 @@ const validateTickerSymbol = async (symbol) => {
   }
 
   const data = await response.json();
-  
-  console.log("Alpha Vantage response:", JSON.stringify(data));
 
   // Alpha Vantage may return these when the request
   // cannot be processed normally.
