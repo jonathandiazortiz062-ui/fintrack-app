@@ -12,3 +12,5 @@ what your monthly fincacial responsabilities are like the google sheet you have.
 7.) Add a way to keep trak of your 401K AND IRA accounts.
 
 8.) Add a button to the login for registering and create a HOMEPAGE (LOGIN - SIGNUP)
+
+9.) Add an Fintrack app icon on the browser tab.
