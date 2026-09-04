@@ -20,6 +20,8 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import SavingsIcon from "@mui/icons-material/Savings";
 
 //We are using the same layout for all of our pages, so we can just copy and paste the code from the Budgets page and change the text to match the Investments page. However,
 // we will create reusable components for the cards, buttons, and other UI elements so that we can use them on other pages as well.
@@ -50,7 +52,7 @@ function Budgets() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [budgetToDelete, setBudgetToDelete] = useState(null);
-  
+
   const today = new Date();
 
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -338,43 +340,117 @@ function Budgets() {
             sm: "row",
           },
           gap: 2,
-          mb: 3,
+          mb: 4,
         }}
       >
-        <Typography variant="h4">Budgets</Typography>
+        <Box>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              mb: 0.5,
+            }}
+          >
+            Budgets
+          </Typography>
+
+          <Typography variant="body1" color="text.secondary">
+            Set monthly spending limits and track your progress.
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            Budget period: {budgetPeriod}
+          </Typography>
+        </Box>
 
         <Button
           variant="contained"
+          startIcon={<AddIcon />}
           onClick={handleOpen}
           sx={{
             width: {
               xs: "100%",
               sm: "auto",
             },
+            px: 2.5,
+            py: 1,
+            borderRadius: 2,
+            textTransform: "none",
+            fontWeight: 600,
           }}
         >
           Add Budget
         </Button>
       </Box>
-      <Typography
-  variant="body2"
-  color="text.secondary"
-  sx={{ mb: 3 }}
->
-  Budget period: {budgetPeriod}
-</Typography>
 
       {budgets.length === 0 ? (
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
+        <Card
+          sx={{
+            borderRadius: 3,
+            border: 1,
+            borderColor: "divider",
+            boxShadow: 1,
+          }}
+        >
+          <CardContent
+            sx={{
+              py: 6,
+              px: 3,
+              textAlign: "center",
+            }}
+          >
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(25, 118, 210, 0.08)",
+                color: "primary.main",
+                mx: "auto",
+                mb: 2,
+              }}
+            >
+              <SavingsIcon sx={{ fontSize: 30 }} />
+            </Box>
+
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 0.5,
+              }}
+            >
               No Budgets Yet
             </Typography>
 
-            <Typography color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                maxWidth: 420,
+                mx: "auto",
+                mb: 2.5,
+              }}
+            >
               Create your first monthly budget to start tracking spending by
               category.
             </Typography>
+
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpen}
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+            >
+              Create Your First Budget
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -397,72 +473,185 @@ function Budgets() {
             const isOverBudget = spent > limit;
 
             return (
-              <Card key={budget.id}>
-                <CardContent>
+              <Card
+                key={budget.id}
+                sx={{
+                  height: "100%",
+                  borderRadius: 3,
+                  border: 1,
+                  borderColor: "divider",
+                  boxShadow: 1,
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+
+                  "&:hover": {
+                    transform: "translateY(-3px)",
+                    boxShadow: 4,
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  {/* Card header */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      gap: 1,
+                      mb: 3,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        minWidth: 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "rgba(25, 118, 210, 0.08)",
+                          color: "primary.main",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <SavingsIcon />
+                      </Box>
+
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 700,
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {budget.category_name}
+                        </Typography>
+
+                        <Typography variant="body2" color="text.secondary">
+                          Monthly Budget
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ display: "flex" }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditBudget(budget)}
+                        aria-label="edit budget"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleOpenDeleteDialog(budget)}
+                        aria-label="delete budget"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Box>
+
+                  {/* Budget limit */}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 0.5 }}
+                  >
+                    Monthly Limit
+                  </Typography>
+
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 2.5,
+                    }}
+                  >
+                    ${limit.toFixed(2)}
+                  </Typography>
+
+                  {/* Spending */}
                   <Box
                     sx={{
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
-                      gap: 2,
+                      mb: 1,
                     }}
                   >
-                    <Box>
-                      <Typography variant="h6">
-                        {budget.category_name}
-                      </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      ${spent.toFixed(2)} spent
+                    </Typography>
 
-                      <Typography color="text.secondary">
-                        Monthly Budget
-                      </Typography>
-                    </Box>
-
-                    <Box>
-                      <IconButton
-                        onClick={() => handleEditBudget(budget)}
-                        aria-label="edit budget"
-                      >
-                        <EditIcon />
-                      </IconButton>
-
-                      <IconButton
-                        onClick={() => handleOpenDeleteDialog(budget)}
-                        aria-label="delete budget"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 600,
+                        color: isOverBudget
+                          ? "error.main"
+                          : percentage >= 75
+                            ? "warning.main"
+                            : "text.secondary",
+                      }}
+                    >
+                      {percentage.toFixed(1)}%
+                    </Typography>
                   </Box>
 
-                  <Typography variant="h5" sx={{ mt: 2 }}>
-                    ${Number(budget.monthly_limit).toFixed(2)}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 2 }}
-                  >
-                    ${spent.toFixed(2)} spent of ${limit.toFixed(2)}
-                  </Typography>
                   <LinearProgress
                     variant="determinate"
                     value={Math.min(percentage, 100)}
-                    sx={{ mt: 1 }}
                     color={
-                      percentage >= 75 && percentage < 100
-                        ? "warning"
-                        : isOverBudget
-                          ? "error"
+                      isOverBudget
+                        ? "error"
+                        : percentage >= 75
+                          ? "warning"
                           : "primary"
                     }
+                    sx={{
+                      height: 8,
+                      borderRadius: 4,
+                    }}
                   />
-                  <Typography
-                    variant="body2"
-                    color={isOverBudget ? "error" : "text.secondary"}
-                    sx={{ mt: 0.5 }}
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mt: 1,
+                    }}
                   >
-                    {percentage.toFixed(1)}%{isOverBudget && " - Over Budget"}
-                  </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      $0
+                    </Typography>
+
+                    <Typography variant="caption" color="text.secondary">
+                      ${limit.toFixed(2)}
+                    </Typography>
+                  </Box>
+
+                  {isOverBudget && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 1.5,
+                        fontWeight: 600,
+                        color: "error.main",
+                      }}
+                    >
+                      Over budget by ${(spent - limit).toFixed(2)}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -474,12 +663,22 @@ function Budgets() {
         onClose={() => setOpen(false)}
         fullWidth
         maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+          },
+        }}
       >
-        <DialogTitle>
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            pb: 1,
+          }}
+        >
           {editingBudgetId ? "Edit Budget" : "Add Budget"}
         </DialogTitle>
 
-        <DialogContent>
+        <DialogContent sx={{ pt: 1 }}>
           <TextField
             select
             label="Category"
@@ -516,19 +715,48 @@ function Budgets() {
           )}
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+            pt: 2,
+          }}
+        >
+          <Button
+            onClick={() => setOpen(false)}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            Cancel
+          </Button>
 
           <Button
             variant="contained"
             onClick={editingBudgetId ? handleUpdateBudget : handleCreateBudget}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+            }}
           >
             {editingBudgetId ? "Save Changes" : "Save Budget"}
           </Button>
         </DialogActions>
       </Dialog>
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Delete Budget?</DialogTitle>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Delete Budget?</DialogTitle>
 
         <DialogContent>
           <DialogContentText>
@@ -538,8 +766,21 @@ function Budgets() {
           </DialogContentText>
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+          }}
+        >
+          <Button
+            onClick={handleCloseDeleteDialog}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            Cancel
+          </Button>
 
           <Button
             color="error"
@@ -548,6 +789,10 @@ function Budgets() {
                 handleDeleteBudget(budgetToDelete.id);
                 handleCloseDeleteDialog();
               }
+            }}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
             }}
           >
             Delete

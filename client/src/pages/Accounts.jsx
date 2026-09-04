@@ -17,6 +17,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import AddIcon from "@mui/icons-material/Add";
 import { apiFetch } from "../../utils/api";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -160,10 +162,10 @@ function Accounts() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            name: formData.name,
-            accountType: formData.accountType,
-            balance: Number(formData.balance),
-          }),
+          name: formData.name,
+          accountType: formData.accountType,
+          balance: Number(formData.balance),
+        }),
       });
 
       if (!response.ok) {
@@ -193,7 +195,6 @@ function Accounts() {
       return;
     }
     try {
-
       const response = await apiFetch(`/api/accounts/${editingAccountId}`, {
         method: "PUT",
         headers: {
@@ -308,19 +309,39 @@ function Accounts() {
             sm: "row",
           },
           gap: 2,
-          mb: 3,
+          mb: 4,
         }}
       >
-        <Typography variant="h4">Accounts</Typography>
+        <Box>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              mb: 0.5,
+            }}
+          >
+            Accounts
+          </Typography>
+
+          <Typography variant="body1" color="text.secondary">
+            Manage your financial accounts and balances.
+          </Typography>
+        </Box>
 
         <Button
           variant="contained"
+          startIcon={<AddIcon />}
           onClick={handleOpen}
           sx={{
             width: {
               xs: "100%",
               sm: "auto",
             },
+            px: 2.5,
+            py: 1,
+            borderRadius: 2,
+            textTransform: "none",
+            fontWeight: 600,
           }}
         >
           Add Account
@@ -328,75 +349,186 @@ function Accounts() {
       </Box>
 
       {accounts.length === 0 ? (
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
+        <Card
+          sx={{
+            borderRadius: 3,
+            border: 1,
+            borderColor: "divider",
+            boxShadow: 1,
+          }}
+        >
+          <CardContent
+            sx={{
+              py: 6,
+              px: 3,
+              textAlign: "center",
+            }}
+          >
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(25, 118, 210, 0.08)",
+                color: "primary.main",
+                mx: "auto",
+                mb: 2,
+              }}
+            >
+              <AccountBalanceWalletIcon sx={{ fontSize: 30 }} />
+            </Box>
+
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 0.5,
+              }}
+            >
               No Accounts Yet
             </Typography>
 
-            <Typography color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                maxWidth: 400,
+                mx: "auto",
+                mb: 2.5,
+              }}
+            >
               Add your first account to begin tracking your finances.
             </Typography>
+
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpen}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: 2,
+              }}
+            >
+              Add Your First Account
+            </Button>
           </CardContent>
         </Card>
       ) : (
         <Grid container spacing={3}>
           {accounts.map((account) => (
             <Grid key={account.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Card>
-                <CardContent>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 3,
+                  border: 1,
+                  borderColor: "divider",
+                  boxShadow: 1,
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+
+                  "&:hover": {
+                    transform: "translateY(-3px)",
+                    boxShadow: 4,
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
                   <Box
                     sx={{
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: {
-                        xs: "flex-start",
-                        sm: "center",
-                      },
-                      flexDirection: {
-                        xs: "column",
-                        sm: "row",
-                      },
-                      gap: 2,
+                      alignItems: "flex-start",
+                      mb: 3,
                     }}
                   >
-                    <Box>
-                      <Typography variant="h6">{account.name}</Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        minWidth: 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "rgba(25, 118, 210, 0.08)",
+                          color: "primary.main",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <AccountBalanceWalletIcon />
+                      </Box>
 
-                      <Typography color="text.secondary">
-                        {account.account_type}
-                      </Typography>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 700,
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {account.name}
+                        </Typography>
+
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            textTransform: "capitalize",
+                          }}
+                        >
+                          {account.account_type}
+                        </Typography>
+                      </Box>
                     </Box>
 
                     <Box
                       sx={{
                         display: "flex",
-                        alignSelf: {
-                          xs: "flex-end",
-                          sm: "center",
-                        },
+                        ml: 1,
                       }}
                     >
                       <IconButton
+                        size="small"
                         onClick={() => handleEdit(account)}
                         aria-label="edit account"
                       >
-                        <EditIcon />
+                        <EditIcon fontSize="small" />
                       </IconButton>
 
                       <IconButton
+                        size="small"
+                        color="error"
                         onClick={() => handleOpenDeleteDialog(account)}
                         aria-label="delete account"
                       >
-                        <DeleteIcon />
+                        <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Box>
                   </Box>
 
                   <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 0.5 }}
+                  >
+                    Current Balance
+                  </Typography>
+
+                  <Typography
                     variant="h5"
                     sx={{
-                      mt: 2,
+                      fontWeight: 700,
                       color:
                         Number(account.balance) < 0
                           ? "error.main"
@@ -414,12 +546,27 @@ function Accounts() {
         </Grid>
       )}
 
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            pb: 1,
+          }}
+        >
           {editingAccountId ? "Edit Account" : "Add Account"}
         </DialogTitle>
 
-        <DialogContent>
+        <DialogContent sx={{ pt: 1 }}>
           <TextField
             label="Account Name"
             name="name"
@@ -464,10 +611,29 @@ function Accounts() {
           />
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+            pt: 2,
+          }}
+        >
+          <Button
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+            onClick={handleClose}
+          >
+            Cancel
+          </Button>
 
           <Button
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+            }}
             variant="contained"
             onClick={
               editingAccountId ? handleUpdateAccount : handleCreateAccount
@@ -478,8 +644,18 @@ function Accounts() {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Delete Account?</DialogTitle>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Delete Account?</DialogTitle>
 
         <DialogContent>
           <DialogContentText>
@@ -490,7 +666,12 @@ function Accounts() {
           </DialogContentText>
         </DialogContent>
 
-        <DialogActions>
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+          }}
+        >
           <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
 
           <Button

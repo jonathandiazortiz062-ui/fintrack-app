@@ -119,38 +119,122 @@ function Register() {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 10 }}>
-        <Paper sx={{ p: 4 }}>
-          <Typography variant="h4" align="center" gutterBottom>
-            FinTrack
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        px: 3,
+        py: 6,
+        backgroundImage: `
+        linear-gradient(
+          rgba(255,255,255,0.68),
+          rgba(255,255,255,0.68)
+        ),
+        url("/fintrack-hero-bg.png")
+      `,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={8}
+          sx={{
+            p: { xs: 3, sm: 5 },
+            borderRadius: 4,
+            border: 1,
+            borderColor: "divider",
+            backgroundColor: "rgba(255,255,255,0.96)",
+          }}
+        >
+          {/* FinTrack branding */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              mb: 3,
+            }}
+          >
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 2,
+                backgroundColor: "primary.main",
+                color: "primary.contrastText",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+                fontSize: "1.6rem",
+                mb: 1.5,
+              }}
+            >
+              F
+            </Box>
+
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+              }}
+            >
+              FinTrack
+            </Typography>
+          </Box>
+
+          <Typography
+            variant="h5"
+            align="center"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+            }}
+          >
+            Create Your Account
           </Typography>
 
-          <Typography variant="h6" align="center" gutterBottom>
-            Create Account
+          <Typography align="center" color="text.secondary" sx={{ mb: 3 }}>
+            Start building a clearer picture of your finances.
           </Typography>
 
-          <TextField
-            label="First Name"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(formErrors.firstName)}
-            helperText={formErrors.firstName}
-          />
+          {/* Name fields */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "1fr 1fr",
+              },
+              gap: { xs: 0, sm: 2 },
+            }}
+          >
+            <TextField
+              label="First Name"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              error={Boolean(formErrors.firstName)}
+              helperText={formErrors.firstName}
+            />
 
-          <TextField
-            label="Last Name"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(formErrors.lastName)}
-            helperText={formErrors.lastName}
-          />
+            <TextField
+              label="Last Name"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              error={Boolean(formErrors.lastName)}
+              helperText={formErrors.lastName}
+            />
+          </Box>
 
           <TextField
             label="Email"
@@ -187,23 +271,67 @@ function Register() {
             error={Boolean(formErrors.confirmPassword)}
             helperText={formErrors.confirmPassword}
           />
+
           {error && (
-            <Typography color="error" sx={{ mt: 1 }}>
+            <Typography
+              color="error"
+              sx={{
+                mt: 1,
+                textAlign: "center",
+              }}
+            >
               {error}
             </Typography>
           )}
+
           <Button
             variant="contained"
             fullWidth
-            sx={{ mt: 2 }}
+            size="large"
+            sx={{
+              mt: 3,
+              py: 1.3,
+              textTransform: "none",
+              fontWeight: 700,
+            }}
             onClick={handleRegister}
             disabled={loading}
           >
             {loading ? "Creating Account..." : "Create Account"}
           </Button>
+
+          <Typography align="center" color="text.secondary" sx={{ mt: 3 }}>
+            Already have an account?{" "}
+            <Box
+              component="span"
+              onClick={() => navigate("/login")}
+              sx={{
+                color: "primary.main",
+                fontWeight: 700,
+                cursor: "pointer",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Log In
+            </Box>
+          </Typography>
+
+          <Button
+            variant="text"
+            fullWidth
+            onClick={() => navigate("/")}
+            sx={{
+              mt: 1,
+              textTransform: "none",
+            }}
+          >
+            Back to Home
+          </Button>
         </Paper>
-      </Box>
-    </Container>
+      </Container>
+    </Box>
   );
 }
 

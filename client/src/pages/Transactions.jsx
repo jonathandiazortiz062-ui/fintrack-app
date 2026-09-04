@@ -23,7 +23,9 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
+import AddIcon from "@mui/icons-material/Add";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 //We are using the same layout for all of our pages, so we can just copy and paste the code from the Budgets page and change the text to match the Investments page. However,
 // we will create reusable components for the cards, buttons, and other UI elements so that we can use them on other pages as well.
 // This will make our code more maintainable and easier to read.
@@ -463,29 +465,73 @@ function Transactions() {
             sm: "row",
           },
           gap: 2,
-          mb: 3,
+          mb: 4,
         }}
       >
-        <Typography variant="h4">Transactions</Typography>
+        <Box>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              mb: 0.5,
+            }}
+          >
+            Transactions
+          </Typography>
+
+          <Typography variant="body1" color="text.secondary">
+            Track and manage your income and expenses.
+          </Typography>
+        </Box>
 
         <Button
           variant="contained"
+          startIcon={<AddIcon />}
           onClick={handleOpen}
           sx={{
             width: {
               xs: "100%",
               sm: "auto",
             },
+            px: 2.5,
+            py: 1,
+            borderRadius: 2,
+            textTransform: "none",
+            fontWeight: 600,
           }}
         >
           Add Transaction
         </Button>
       </Box>
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Filters
-          </Typography>
+      <Card
+        sx={{
+          mb: 4,
+          borderRadius: 3,
+          border: 1,
+          borderColor: "divider",
+          boxShadow: 1,
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              mb: 2.5,
+            }}
+          >
+            <FilterListIcon color="primary" />
+
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+              }}
+            >
+              Filters
+            </Typography>
+          </Box>
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -583,138 +629,266 @@ function Transactions() {
                 alignItems: "center",
               }}
             >
-              <Button variant="contained" onClick={handleApplyFilters}>
-                Apply
+              <Button
+                variant="contained"
+                onClick={handleApplyFilters}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 2.5,
+                }}
+              >
+                Apply Filters
               </Button>
 
-              <Button variant="outlined" onClick={handleClearFilters}>
+              <Button
+                variant="outlined"
+                onClick={handleClearFilters}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 2.5,
+                }}
+              >
                 Clear
               </Button>
             </Grid>
           </Grid>
         </CardContent>
       </Card>
-
       {transactions.length === 0 ? (
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
+        <Card
+          sx={{
+            borderRadius: 3,
+            border: 1,
+            borderColor: "divider",
+            boxShadow: 1,
+          }}
+        >
+          <CardContent
+            sx={{
+              py: 6,
+              px: 3,
+              textAlign: "center",
+            }}
+          >
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(25, 118, 210, 0.08)",
+                color: "primary.main",
+                mx: "auto",
+                mb: 2,
+              }}
+            >
+              <ReceiptLongIcon sx={{ fontSize: 30 }} />
+            </Box>
+
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 0.5,
+              }}
+            >
               No Transactions Yet
             </Typography>
 
-            <Typography color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                maxWidth: 420,
+                mx: "auto",
+                mb: 2.5,
+              }}
+            >
               Add your first transaction to begin tracking your income and
               expenses.
             </Typography>
+
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpen}
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+            >
+              Add Your First Transaction
+            </Button>
           </CardContent>
         </Card>
       ) : (
-        <Grid container spacing={2}>
-          {transactions.map((transaction) => (
-            <Grid key={transaction.id} size={{ xs: 12 }}>
-              <Card>
-                <CardContent>
-                  <Box
+        <Box>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 700,
+              mb: 0.5,
+            }}
+          >
+            Transaction History
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Review your recorded income and expenses.
+          </Typography>
+
+          <Card
+            sx={{
+              borderRadius: 3,
+              border: 1,
+              borderColor: "divider",
+              boxShadow: 1,
+              overflow: "hidden",
+            }}
+          >
+            {transactions.map((transaction, index) => (
+              <Box
+                key={transaction.id}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: {
+                    xs: "flex-start",
+                    sm: "center",
+                  },
+                  flexDirection: {
+                    xs: "column",
+                    sm: "row",
+                  },
+                  gap: 2,
+                  px: 3,
+                  py: 2.5,
+
+                  borderBottom: index !== transactions.length - 1 ? 1 : 0,
+
+                  borderColor: "divider",
+
+                  "&:hover": {
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
+                {/* Left side */}
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      flexDirection: {
-                        xs: "column",
-                        sm: "row",
-                      },
-                      gap: 2,
+                      fontWeight: 700,
+                      mb: 0.5,
                     }}
                   >
-                    <Box>
-                      <Typography variant="h6">
-                        {transaction.description}
-                      </Typography>
-                      {transaction.account_deleted_at ? (
-                        <Typography sx={{ color: "text.disabled" }}>
-                          {transaction.account_name} (Deleted Account)
-                          {" • "}
-                          {transaction.category_name || "Uncategorized"}
-                        </Typography>
-                      ) : (
-                        <Typography color="text.secondary">
-                          {transaction.account_name}
-                          {" • "}
-                          {transaction.category_name || "Uncategorized"}
-                        </Typography>
-                      )}
+                    {transaction.description}
+                  </Typography>
 
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mt: 1 }}
-                      >
-                        {new Date(
-                          transaction.transaction_date,
-                        ).toLocaleDateString()}
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: {
-                          xs: "row",
-                          sm: "column",
-                        },
-                        justifyContent: {
-                          xs: "space-between",
-                          sm: "flex-start",
-                        },
-                        alignItems: {
-                          xs: "center",
-                          sm: "flex-end",
-                        },
-                        gap: 1,
-                      }}
-                    >
-                      <IconButton
-                        onClick={() => handleEditTransaction(transaction)}
-                        aria-label="edit transaction"
-                      >
-                        <EditIcon />
-                      </IconButton>
-
-                      <IconButton
-                        onClick={() => handleOpenDeleteDialog(transaction)}
-                        aria-label="delete transaction"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-
-                    <Typography
-                      variant="h6"
-                      color={
-                        transaction.transaction_type === "income"
-                          ? "success"
-                          : "error"
-                      }
-                    >
-                      {transaction.transaction_type === "expense" ? "-" : "+"}$
-                      {Number(transaction.amount).toFixed(2)}
+                  {transaction.account_deleted_at ? (
+                    <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                      {transaction.account_name} (Deleted Account)
+                      {" • "}
+                      {transaction.category_name || "Uncategorized"}
                     </Typography>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {transaction.account_name}
+                      {" • "}
+                      {transaction.category_name || "Uncategorized"}
+                    </Typography>
+                  )}
+
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 0.5 }}
+                  >
+                    {new Date(
+                      transaction.transaction_date,
+                    ).toLocaleDateString()}
+                  </Typography>
+                </Box>
+
+                {/* Right side */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    width: {
+                      xs: "100%",
+                      sm: "auto",
+                    },
+                    gap: 2,
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      color:
+                        transaction.transaction_type === "income"
+                          ? "success.main"
+                          : "error.main",
+                    }}
+                  >
+                    {transaction.transaction_type === "expense" ? "-" : "+"}$
+                    {Number(transaction.amount).toFixed(2)}
+                  </Typography>
+
+                  <Box sx={{ display: "flex" }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditTransaction(transaction)}
+                      aria-label="edit transaction"
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleOpenDeleteDialog(transaction)}
+                      aria-label="delete transaction"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
                   </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                </Box>
+              </Box>
+            ))}
+          </Card>
+        </Box>
       )}
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
         fullWidth
         maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+          },
+        }}
       >
-        <DialogTitle>
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            pb: 1,
+          }}
+        >
           {editingTransactionId ? "Edit Transaction" : "Add Transaction"}
         </DialogTitle>
 
-        <DialogContent>
+        <DialogContent sx={{ pt: 1 }}>
           <TextField
             select
             label="Account"
@@ -811,10 +985,29 @@ function Transactions() {
           />
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+            pt: 2,
+          }}
+        >
+          <Button
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
 
           <Button
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+            }}
             variant="contained"
             onClick={
               editingTransactionId
@@ -826,8 +1019,18 @@ function Transactions() {
           </Button>
         </DialogActions>
       </Dialog>
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Delete Transaction?</DialogTitle>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Delete Transaction?</DialogTitle>
 
         <DialogContent>
           <DialogContentText>
@@ -837,7 +1040,12 @@ function Transactions() {
           </DialogContentText>
         </DialogContent>
 
-        <DialogActions>
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+          }}
+        >
           <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
 
           <Button
