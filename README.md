@@ -435,6 +435,41 @@ npm test
 
 The test suite automatically uses the dedicated `fintrack_test` database when running in the test environment.
 
+## Development Workflow
+
+FinTrack uses a two-environment development workflow:
+
+### Development
+
+Development is performed locally using feature or bug-fix branches.
+
+- React/Vite frontend runs locally
+- Express API runs locally
+- PostgreSQL runs locally
+- Environment variables are stored in local `.env` files and are excluded from Git
+
+New work is developed on short-lived branches such as:
+
+`feature/landing-page`
+
+or:
+
+`fix/example-bug`
+
+Changes are tested locally before being merged into `main`.
+
+### Production
+
+The `main` branch represents production-ready code.
+
+When changes are merged into `main` and pushed to GitHub:
+
+- Vercel automatically deploys the React frontend
+- Render automatically deploys the Express API
+- The production API connects to Neon PostgreSQL
+
+Production secrets and configuration are managed through Vercel and Render environment variables rather than committed `.env` files.
+
 ---
 
 ## Application Preview
