@@ -121,13 +121,17 @@ FinTrack implements authentication and authorization at the backend API layer ra
 
 ### Authentication Flow
 
-1. A user registers with their name, email address, and password.
-2. Passwords are hashed using bcrypt before being stored in PostgreSQL.
-3. After successful authentication, the backend creates a JSON Web Token (JWT).
-4. The JWT is stored in an HTTP-only cookie.
-5. Protected API requests include the authentication cookie automatically.
-6. Authentication middleware validates the token and attaches the authenticated user's identity to the request.
-7. Controllers use the authenticated user ID to restrict access to user-owned resources.
+1. The user signs in using their Google account.
+2. Google authenticates the user's identity and returns an ID token to the frontend.
+3. The frontend sends the Google credential to the FinTrack backend through `POST /api/auth/google`.
+4. The backend verifies the Google ID token using Google's authentication library and the application's Google OAuth Client ID.
+5. For a first-time user, FinTrack creates a local user record containing the verified Google identity information. Returning users are matched using their Google ID.
+6. After successful authentication, FinTrack creates its own JSON Web Token (JWT) containing the user's internal FinTrack user ID.
+7. The JWT is stored in an HTTP-only cookie and automatically included with protected API requests.
+8. Authentication middleware verifies the JWT and attaches the authenticated user's identity to the request.
+9. Controllers use the authenticated user's internal database ID to restrict access to user-owned resources.
+
+FinTrack does not store or manage user passwords. Google is responsible for authenticating the user's identity, while FinTrack maintains its own application session and authorization model.
 
 This provides user-level data isolation for financial accounts, transactions, budgets, and investments.
 
@@ -136,7 +140,8 @@ This provides user-level data isolation for financial accounts, transactions, bu
 - Parameterized PostgreSQL queries
 - Server-side input validation
 - Email normalization
-- Password-length validation
+- Google ID token verification
+- Verified Google email validation
 - Account ownership verification
 - Transaction ownership verification
 - Budget ownership verification
@@ -263,7 +268,10 @@ The test suite currently contains **50 automated tests**:
 
 The automated test suite verifies behaviors including:
 
-- User registration and login
+- Google authentication and user creation
+- Returning Google user authentication
+- Google account linking by verified email
+- Authentication cookie handling
 - Authentication cookie handling
 - Protected API endpoints
 - User-level data isolation
@@ -360,8 +368,8 @@ DB_USER=your_postgres_user
 DB_PASSWORD=your_postgres_password
 
 JWT_SECRET=your_jwt_secret
-
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
 
 Environment files contain sensitive credentials and should never be committed to version control.
@@ -378,6 +386,7 @@ DB_USER=your_postgres_user
 DB_PASSWORD=your_postgres_password
 
 JWT_SECRET=your_test_jwt_secret
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
 
 The automated investment tests mock external market-data requests, so they do not require live Alpha Vantage requests.
@@ -395,6 +404,7 @@ Create a `.env` file inside `client/`:
 
 ```env
 VITE_API_URL=http://localhost:3000
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
 
 ### 6. Start the Backend
@@ -519,7 +529,7 @@ FinTrack currently supports the complete core workflow for:
 - Multi-user authorization
 - Automated backend testing
 
-The application is currently being prepared for production deployment.
+The application is deployed in production using Vercel for the frontend, Render for the backend API, and Neon PostgreSQL for the production database.
 
 ---
 
