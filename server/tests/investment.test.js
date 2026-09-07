@@ -1,18 +1,14 @@
 import request from "supertest";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import app from "../app.js";
 import pool from "../db/db.js";
+import { googleClient } from "../controllers/authController.js";
 
 describe("Investments API", () => {
+  let googleVerifySpy;
   beforeEach(async () => {
+    googleVerifySpy = vi.spyOn(googleClient, "verifyIdToken");
     await pool.query(`
       DELETE FROM investments
       WHERE user_id IN (
@@ -50,54 +46,46 @@ describe("Investments API", () => {
     vi.restoreAllMocks();
   });
 
-  const createAuthenticatedUser = async (
-    email = "user@investments.test",
-  ) => {
+  const createAuthenticatedUser = async (email = "user@investments.test") => {
     const agent = request.agent(app);
 
-    await agent
-      .post("/api/auth/register")
-      .send({
-        firstName: "Investment",
-        lastName: "Tester",
-        email,
-        password: "Password123!",
-      });
+    const googleId = `google-${email}`;
 
-    const loginResponse = await agent
-      .post("/api/auth/login")
-      .send({
+    googleVerifySpy.mockResolvedValueOnce({
+      getPayload: () => ({
+        sub: googleId,
         email,
-        password: "Password123!",
-      });
+        email_verified: true,
+        given_name: "Investment",
+        family_name: "Tester",
+      }),
+    });
+
+    const loginResponse = await agent.post("/api/auth/google").send({
+      credential: `fake-token-${email}`,
+    });
 
     expect(loginResponse.status).toBe(200);
 
     return agent;
   };
 
-  const createInvestment = async (
-    agent,
-    overrides = {},
-  ) => {
-    return agent
-      .post("/api/investments")
-      .send({
-        symbol: "AAPL",
-        quantity: 10,
-        purchasePrice: 200,
-        ...overrides,
-      });
+  const createInvestment = async (agent, overrides = {}) => {
+    return agent.post("/api/investments").send({
+      symbol: "AAPL",
+      quantity: 10,
+      purchasePrice: 200,
+      ...overrides,
+    });
   };
 
-    it("should reject unauthenticated access to investments", async () => {
-    const response = await request(app)
-      .get("/api/investments");
+  it("should reject unauthenticated access to investments", async () => {
+    const response = await request(app).get("/api/investments");
 
     expect(response.status).toBe(401);
   });
 
-    it("should create a valid investment", async () => {
+  it("should create a valid investment", async () => {
     const agent = await createAuthenticatedUser();
 
     const response = await createInvestment(agent, {
@@ -111,7 +99,7 @@ describe("Investments API", () => {
     expect(Number(response.body.purchase_price)).toBe(200);
   });
 
-    it("should reject a negative quantity", async () => {
+  it("should reject a negative quantity", async () => {
     const agent = await createAuthenticatedUser();
 
     const response = await createInvestment(agent, {
@@ -125,7 +113,7 @@ describe("Investments API", () => {
     );
   });
 
-    it("should reject a non-numeric quantity", async () => {
+  it("should reject a non-numeric quantity", async () => {
     const agent = await createAuthenticatedUser();
 
     const response = await createInvestment(agent, {
@@ -139,7 +127,7 @@ describe("Investments API", () => {
     );
   });
 
-    it("should reject an invalid stock symbol", async () => {
+  it("should reject an invalid stock symbol", async () => {
     const agent = await createAuthenticatedUser();
 
     globalThis.fetch.mockResolvedValueOnce({
@@ -155,33 +143,23 @@ describe("Investments API", () => {
 
     expect(response.status).toBe(400);
 
-    expect(response.body.message).toBe(
-      "Invalid stock symbol",
-    );
+    expect(response.body.message).toBe("Invalid stock symbol");
   });
 
-    it("should return only the authenticated user's investments", async () => {
-    const userOne = await createAuthenticatedUser(
-      "user1@investments.test",
-    );
+  it("should return only the authenticated user's investments", async () => {
+    const userOne = await createAuthenticatedUser("user1@investments.test");
 
-    const userTwo = await createAuthenticatedUser(
-      "user2@investments.test",
-    );
+    const userTwo = await createAuthenticatedUser("user2@investments.test");
 
-    const firstInvestment =
-      await createInvestment(userOne);
+    const firstInvestment = await createInvestment(userOne);
 
     expect(firstInvestment.status).toBe(201);
 
-    const secondInvestment =
-      await createInvestment(userTwo);
+    const secondInvestment = await createInvestment(userTwo);
 
     expect(secondInvestment.status).toBe(201);
 
-    const response = await userOne.get(
-      "/api/investments",
-    );
+    const response = await userOne.get("/api/investments");
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(1);
@@ -189,7 +167,7 @@ describe("Investments API", () => {
     expect(response.body[0].symbol).toBe("AAPL");
   });
 
-    it("should prevent a user from updating another user's investment", async () => {
+  it("should prevent a user from updating another user's investment", async () => {
     const userOne = await createAuthenticatedUser(
       "updateowner@investments.test",
     );
@@ -198,8 +176,7 @@ describe("Investments API", () => {
       "updateother@investments.test",
     );
 
-    const createResponse =
-      await createInvestment(userOne);
+    const createResponse = await createInvestment(userOne);
 
     expect(createResponse.status).toBe(201);
 
@@ -215,12 +192,10 @@ describe("Investments API", () => {
 
     expect(response.status).toBe(404);
 
-    expect(response.body.message).toBe(
-      "Investment not found",
-    );
+    expect(response.body.message).toBe("Investment not found");
   });
 
-    it("should prevent a user from deleting another user's investment", async () => {
+  it("should prevent a user from deleting another user's investment", async () => {
     const userOne = await createAuthenticatedUser(
       "deleteowner@investments.test",
     );
@@ -229,25 +204,20 @@ describe("Investments API", () => {
       "deleteother@investments.test",
     );
 
-    const createResponse =
-      await createInvestment(userOne);
+    const createResponse = await createInvestment(userOne);
 
     expect(createResponse.status).toBe(201);
 
     const investmentId = createResponse.body.id;
 
-    const response = await userTwo.delete(
-      `/api/investments/${investmentId}`,
-    );
+    const response = await userTwo.delete(`/api/investments/${investmentId}`);
 
     expect(response.status).toBe(404);
 
-    expect(response.body.message).toBe(
-      "Investment not found",
-    );
+    expect(response.body.message).toBe("Investment not found");
   });
 
-    it("should return 503 when Alpha Vantage cannot validate the symbol", async () => {
+  it("should return 503 when Alpha Vantage cannot validate the symbol", async () => {
     const agent = await createAuthenticatedUser();
 
     globalThis.fetch.mockResolvedValueOnce({
@@ -266,7 +236,7 @@ describe("Investments API", () => {
     );
   });
 
-    it("should return 503 when the market data service request fails", async () => {
+  it("should return 503 when the market data service request fails", async () => {
     const agent = await createAuthenticatedUser();
 
     globalThis.fetch.mockResolvedValueOnce({
@@ -281,5 +251,4 @@ describe("Investments API", () => {
       "Unable to validate stock symbol. Please try again later.",
     );
   });
-
 });

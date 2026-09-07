@@ -1,11 +1,17 @@
 import request from "supertest";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { googleClient } from "../controllers/authController.js";
 
 import app from "../app.js";
 import pool from "../db/db.js";
 
 describe("Accounts API", () => {
+  let googleVerifySpy;
   beforeEach(async () => {
+    vi.restoreAllMocks();
+
+    googleVerifySpy = vi.spyOn(googleClient, "verifyIdToken");
+
     // Remove accounts belonging to users created by this test file
     await pool.query(`
       DELETE FROM accounts
@@ -26,16 +32,20 @@ describe("Accounts API", () => {
   const createAuthenticatedUser = async (email = "user@accounts.test") => {
     const agent = request.agent(app);
 
-    await agent.post("/api/auth/register").send({
-      firstName: "Account",
-      lastName: "Tester",
-      email,
-      password: "Password123!",
+    const googleId = `google-${email}`;
+
+    googleVerifySpy.mockResolvedValueOnce({
+      getPayload: () => ({
+        sub: googleId,
+        email,
+        email_verified: true,
+        given_name: "Account",
+        family_name: "Tester",
+      }),
     });
 
-    const loginResponse = await agent.post("/api/auth/login").send({
-      email,
-      password: "Password123!",
+    const loginResponse = await agent.post("/api/auth/google").send({
+      credential: `fake-token-${email}`,
     });
 
     expect(loginResponse.status).toBe(200);

@@ -1,11 +1,17 @@
 import request from "supertest";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { googleClient } from "../controllers/authController.js";
 
 import app from "../app.js";
 import pool from "../db/db.js";
 
 describe("Transactions API", () => {
+  let googleVerifySpy;
   beforeEach(async () => {
+    vi.restoreAllMocks();
+
+    googleVerifySpy = vi.spyOn(googleClient, "verifyIdToken");
+
     await pool.query(`
       DELETE FROM transactions
       WHERE account_id IN (
@@ -37,16 +43,20 @@ describe("Transactions API", () => {
   const createAuthenticatedUser = async (email = "user@transactions.test") => {
     const agent = request.agent(app);
 
-    await agent.post("/api/auth/register").send({
-      firstName: "Transaction",
-      lastName: "Tester",
-      email,
-      password: "Password123!",
+    const googleId = `google-${email}`;
+
+    googleVerifySpy.mockResolvedValueOnce({
+      getPayload: () => ({
+        sub: googleId,
+        email,
+        email_verified: true,
+        given_name: "Transaction",
+        family_name: "Tester",
+      }),
     });
 
-    const loginResponse = await agent.post("/api/auth/login").send({
-      email,
-      password: "Password123!",
+    const loginResponse = await agent.post("/api/auth/google").send({
+      credential: `fake-token-${email}`,
     });
 
     expect(loginResponse.status).toBe(200);

@@ -1,8 +1,11 @@
-import bcrypt from "bcrypt";
 import pool from "../db/db.js";
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 
 const isProduction = process.env.NODE_ENV === "production";
+export const googleClient = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID
+);
 
 const cookieOptions = {
   httpOnly: true,
@@ -10,113 +13,119 @@ const cookieOptions = {
   sameSite: "lax",
 };
 
-export const register = async (req, res) => {
+//google authentication:
+export const googleLogin = async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { credential } = req.body;
 
-    if (!firstName || !lastName || !email || !password) {
+    if (!credential) {
       return res.status(400).json({
-        message: "All fields are required",
+        message: "Google credential is required",
       });
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(normalizedEmail)) {
-      return res.status(400).json({
-        message: "Please provide a valid email address",
-      });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({
-        message: "Password must be at least 8 characters long",
-      });
-    }
-
-    const existingUser = await pool.query(
-      `SELECT id
-       FROM users
-       WHERE email = $1`,
-      [normalizedEmail],
-    );
-
-    if (existingUser.rows.length > 0) {
-      return res.status(409).json({
-        message: "An account with this email already exists",
-      });
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    const result = await pool.query(
-      `INSERT INTO users (
-        first_name,
-        last_name,
-        email,
-        password_hash
-      )
-      VALUES ($1, $2, $3, $4)
-      RETURNING
-        id,
-        first_name,
-        last_name,
-        email,
-        created_at`,
-      [firstName.trim(), lastName.trim(), normalizedEmail, passwordHash],
-    );
-
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error("Error registering user:", error);
-
-    res.status(500).json({
-      message: "Unable to register user",
+    // Verify the ID token was issued by Google for our FinTrack client.
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
-  }
-};
 
-export const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    const payload = ticket.getPayload();
 
-    if (!email || !password) {
-      return res.status(400).json({
-        message: "Email and password are required",
+    const {
+      sub: googleId,
+      email,
+      email_verified: emailVerified,
+      given_name: firstName,
+      family_name: lastName,
+    } = payload;
+
+    if (!email || !emailVerified) {
+      return res.status(401).json({
+        message: "Google account email could not be verified",
       });
     }
+
     const normalizedEmail = email.trim().toLowerCase();
 
-    const result = await pool.query(
+    // First try to find an existing Google-linked FinTrack account.
+    let result = await pool.query(
       `SELECT
         id,
+        google_id,
         first_name,
         last_name,
-        email,
-        password_hash
+        email
        FROM users
-       WHERE email = $1`,
-      [normalizedEmail],
+       WHERE google_id = $1`,
+      [googleId],
     );
 
-    if (result.rows.length === 0) {
-      return res.status(401).json({
-        message: "Invalid email or password",
-      });
+    let user;
+
+    if (result.rows.length > 0) {
+      user = result.rows[0];
+    } else {
+      // Check whether this email already belongs to an existing FinTrack user.
+      result = await pool.query(
+        `SELECT
+          id,
+          google_id,
+          first_name,
+          last_name,
+          email
+         FROM users
+         WHERE email = $1`,
+        [normalizedEmail],
+      );
+
+      if (result.rows.length > 0) {
+        // Link the existing account to this verified Google identity.
+        const existingUser = result.rows[0];
+
+        const linkedUser = await pool.query(
+          `UPDATE users
+           SET google_id = $1
+           WHERE id = $2
+           RETURNING
+             id,
+             google_id,
+             first_name,
+             last_name,
+             email`,
+          [googleId, existingUser.id],
+        );
+
+        user = linkedUser.rows[0];
+      } else {
+        // First Google sign-in: create the FinTrack account.
+        const createdUser = await pool.query(
+          `INSERT INTO users (
+            google_id,
+            first_name,
+            last_name,
+            email
+          )
+          VALUES ($1, $2, $3, $4)
+          RETURNING
+            id,
+            google_id,
+            first_name,
+            last_name,
+            email`,
+          [
+            googleId,
+            firstName || "Google",
+            lastName || "User",
+            normalizedEmail,
+          ],
+        );
+
+        user = createdUser.rows[0];
+      }
     }
 
-    const user = result.rows[0];
-
-    const passwordMatches = await bcrypt.compare(password, user.password_hash);
-
-    if (!passwordMatches) {
-      return res.status(401).json({
-        message: "Invalid email or password",
-      });
-    }
-
+    // Create the same FinTrack JWT our existing middleware already understands.
     const token = jwt.sign(
       {
         userId: user.id,
@@ -139,10 +148,10 @@ export const login = async (req, res) => {
       email: user.email,
     });
   } catch (error) {
-    console.error("Error logging in:", error);
+    console.error("Google login error:", error);
 
-    res.status(500).json({
-      message: "Unable to log in",
+    res.status(401).json({
+      message: "Unable to authenticate with Google",
     });
   }
 };
@@ -187,7 +196,6 @@ export const getCurrentUser = async (req, res) => {
 
 export const logout = (req, res) => {
   res.clearCookie("token", cookieOptions);
-  
 
   res.json({
     message: "Logged out successfully",

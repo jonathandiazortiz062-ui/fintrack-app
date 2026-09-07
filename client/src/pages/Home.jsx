@@ -86,7 +86,7 @@ function Home() {
 
           <Button
             variant="contained"
-            onClick={() => navigate("/register")}
+            onClick={() => navigate("/login")}
             sx={{
               textTransform: "none",
               fontWeight: 600,
@@ -171,7 +171,7 @@ function Home() {
               <Button
                 variant="contained"
                 size="large"
-                onClick={() => navigate("/register")}
+                onClick={() => navigate("/login")}
               >
                 Create Free Account
               </Button>
@@ -586,7 +586,7 @@ function Home() {
             <Button
               variant="contained"
               size="large"
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/login")}
               sx={{
                 backgroundColor: "background.paper",
                 color: "primary.main",
