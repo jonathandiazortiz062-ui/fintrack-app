@@ -12,21 +12,35 @@ describe("Accounts API", () => {
 
     googleVerifySpy = vi.spyOn(googleClient, "verifyIdToken");
 
-    // Remove accounts belonging to users created by this test file
+    // Remove transactions belonging to accounts created by this test file
     await pool.query(`
-      DELETE FROM accounts
+    DELETE FROM transactions
+    WHERE account_id IN (
+      SELECT id
+      FROM accounts
       WHERE user_id IN (
         SELECT id
         FROM users
         WHERE email LIKE '%@accounts.test'
       )
-    `);
+    )
+  `);
+
+    // Remove accounts belonging to users created by this test file
+    await pool.query(`
+    DELETE FROM accounts
+    WHERE user_id IN (
+      SELECT id
+      FROM users
+      WHERE email LIKE '%@accounts.test'
+    )
+  `);
 
     // Remove the test users
     await pool.query(`
-      DELETE FROM users
-      WHERE email LIKE '%@accounts.test'
-    `);
+    DELETE FROM users
+    WHERE email LIKE '%@accounts.test'
+  `);
   });
 
   const createAuthenticatedUser = async (email = "user@accounts.test") => {
@@ -75,6 +89,7 @@ describe("Accounts API", () => {
       account_type: "checking",
     });
 
+    expect(Number(response.body.starting_balance)).toBe(1500);
     expect(Number(response.body.balance)).toBe(1500);
   });
 
@@ -237,5 +252,44 @@ describe("Accounts API", () => {
     expect(response.status).toBe(404);
 
     expect(response.body.message).toBe("Account not found");
+  });
+
+  it("should adjust current balance when starting balance is updated while preserving transaction effects", async () => {
+    const agent = await createAuthenticatedUser();
+
+    const createResponse = await agent.post("/api/accounts").send({
+      name: "Checking Account",
+      accountType: "checking",
+      balance: 1500,
+    });
+
+    const accountId = createResponse.body.id;
+
+    const transactionResponse = await agent.post("/api/transactions").send({
+      accountId,
+      categoryId: null,
+      description: "Test Income",
+      amount: 500,
+      transactionType: "income",
+      transactionDate: "2026-08-20",
+    });
+
+    expect(transactionResponse.status).toBe(201);
+
+    const beforeUpdateResponse = await agent.get(`/api/accounts/${accountId}`);
+
+    expect(Number(beforeUpdateResponse.body.starting_balance)).toBe(1500);
+    expect(Number(beforeUpdateResponse.body.balance)).toBe(2000);
+
+    const updateResponse = await agent.put(`/api/accounts/${accountId}`).send({
+      name: "Checking Account",
+      accountType: "checking",
+      balance: 1800,
+    });
+
+    expect(updateResponse.status).toBe(200);
+
+    expect(Number(updateResponse.body.starting_balance)).toBe(1800);
+    expect(Number(updateResponse.body.balance)).toBe(2300);
   });
 });

@@ -98,9 +98,12 @@ describe("Transactions API", () => {
 
   it("should create a transaction for the authenticated user's account", async () => {
     const agent = await createAuthenticatedUser();
+
     const account = await createAccount(agent);
 
     const response = await createTransaction(agent, account.id);
+
+    const accountResponse = await agent.get(`/api/accounts/${account.id}`);
 
     expect(response.status).toBe(201);
 
@@ -111,6 +114,226 @@ describe("Transactions API", () => {
     });
 
     expect(Number(response.body.amount)).toBe(100);
+
+    expect(accountResponse.status).toBe(200);
+    expect(Number(accountResponse.body.starting_balance)).toBe(1000);
+    expect(Number(accountResponse.body.balance)).toBe(900);
+  });
+
+  it("should increase the account balance when an income transaction is created", async () => {
+    const agent = await createAuthenticatedUser();
+
+    const account = await createAccount(agent);
+
+    const response = await createTransaction(agent, account.id, {
+      description: "Test Income",
+      amount: 250,
+      transactionType: "income",
+    });
+
+    expect(response.status).toBe(201);
+
+    const accountResponse = await agent.get(`/api/accounts/${account.id}`);
+
+    expect(accountResponse.status).toBe(200);
+    expect(Number(accountResponse.body.starting_balance)).toBe(1000);
+    expect(Number(accountResponse.body.balance)).toBe(1250);
+  });
+
+  it("should restore the account balance when an expense transaction is deleted", async () => {
+    const agent = await createAuthenticatedUser();
+
+    const account = await createAccount(agent);
+
+    // $1,000 - $200 expense = $800
+    const transactionResponse = await createTransaction(agent, account.id, {
+      description: "Expense To Delete",
+      amount: 200,
+      transactionType: "expense",
+    });
+
+    expect(transactionResponse.status).toBe(201);
+
+    const afterCreateResponse = await agent.get(`/api/accounts/${account.id}`);
+
+    expect(Number(afterCreateResponse.body.balance)).toBe(800);
+
+    // Delete the $200 expense
+    const deleteResponse = await agent.delete(
+      `/api/transactions/${transactionResponse.body.id}`,
+    );
+
+    expect(deleteResponse.status).toBe(200);
+
+    // Balance should return to the original $1,000
+    const afterDeleteResponse = await agent.get(`/api/accounts/${account.id}`);
+
+    expect(Number(afterDeleteResponse.body.starting_balance)).toBe(1000);
+    expect(Number(afterDeleteResponse.body.balance)).toBe(1000);
+  });
+
+  it("should reverse the account balance when an income transaction is deleted", async () => {
+    const agent = await createAuthenticatedUser();
+
+    const account = await createAccount(agent);
+
+    // $1,000 + $300 income = $1,300
+    const transactionResponse = await createTransaction(agent, account.id, {
+      description: "Income To Delete",
+      amount: 300,
+      transactionType: "income",
+    });
+
+    expect(transactionResponse.status).toBe(201);
+
+    const afterCreateResponse = await agent.get(`/api/accounts/${account.id}`);
+
+    expect(Number(afterCreateResponse.body.balance)).toBe(1300);
+
+    // Delete the $300 income
+    const deleteResponse = await agent.delete(
+      `/api/transactions/${transactionResponse.body.id}`,
+    );
+
+    expect(deleteResponse.status).toBe(200);
+
+    // Balance should return to $1,000
+    const afterDeleteResponse = await agent.get(`/api/accounts/${account.id}`);
+
+    expect(Number(afterDeleteResponse.body.starting_balance)).toBe(1000);
+    expect(Number(afterDeleteResponse.body.balance)).toBe(1000);
+  });
+
+  it("should adjust the account balance when an expense amount is updated", async () => {
+    const agent = await createAuthenticatedUser();
+
+    const account = await createAccount(agent);
+
+    // $1,000 - $100 expense = $900
+    const transactionResponse = await createTransaction(agent, account.id, {
+      description: "Expense To Update",
+      amount: 100,
+      transactionType: "expense",
+    });
+
+    expect(transactionResponse.status).toBe(201);
+
+    const afterCreateResponse = await agent.get(`/api/accounts/${account.id}`);
+
+    expect(Number(afterCreateResponse.body.balance)).toBe(900);
+
+    // Change the expense from $100 to $250
+    const updateResponse = await agent
+      .put(`/api/transactions/${transactionResponse.body.id}`)
+      .send({
+        accountId: account.id,
+        categoryId: null,
+        description: "Updated Expense",
+        amount: 250,
+        transactionType: "expense",
+        transactionDate: "2026-08-20",
+      });
+
+    expect(updateResponse.status).toBe(200);
+
+    const afterUpdateResponse = await agent.get(`/api/accounts/${account.id}`);
+
+    expect(Number(afterUpdateResponse.body.starting_balance)).toBe(1000);
+    expect(Number(afterUpdateResponse.body.balance)).toBe(750);
+  });
+
+  it("should adjust the account balance when a transaction changes from expense to income", async () => {
+    const agent = await createAuthenticatedUser();
+
+    const account = await createAccount(agent);
+
+    // $1,000 - $200 expense = $800
+    const transactionResponse = await createTransaction(agent, account.id, {
+      description: "Expense To Convert",
+      amount: 200,
+      transactionType: "expense",
+    });
+
+    expect(transactionResponse.status).toBe(201);
+
+    const afterCreateResponse = await agent.get(`/api/accounts/${account.id}`);
+
+    expect(Number(afterCreateResponse.body.balance)).toBe(800);
+
+    // Change the transaction from a $200 expense to a $200 income
+    const updateResponse = await agent
+      .put(`/api/transactions/${transactionResponse.body.id}`)
+      .send({
+        accountId: account.id,
+        categoryId: null,
+        description: "Converted To Income",
+        amount: 200,
+        transactionType: "income",
+        transactionDate: "2026-08-20",
+      });
+
+    expect(updateResponse.status).toBe(200);
+
+    const afterUpdateResponse = await agent.get(`/api/accounts/${account.id}`);
+
+    expect(Number(afterUpdateResponse.body.starting_balance)).toBe(1000);
+    expect(Number(afterUpdateResponse.body.balance)).toBe(1200);
+  });
+
+  it("should adjust both account balances when a transaction is moved to another account", async () => {
+    const agent = await createAuthenticatedUser();
+
+    const accountOne = await createAccount(agent, "Checking Account");
+    const accountTwo = await createAccount(agent, "Savings Account");
+
+    // Both accounts start at $1,000.
+    // Create $250 income in account one.
+    const transactionResponse = await createTransaction(agent, accountOne.id, {
+      description: "Income To Move",
+      amount: 250,
+      transactionType: "income",
+    });
+
+    expect(transactionResponse.status).toBe(201);
+
+    const accountOneAfterCreate = await agent.get(
+      `/api/accounts/${accountOne.id}`,
+    );
+
+    const accountTwoAfterCreate = await agent.get(
+      `/api/accounts/${accountTwo.id}`,
+    );
+
+    expect(Number(accountOneAfterCreate.body.balance)).toBe(1250);
+    expect(Number(accountTwoAfterCreate.body.balance)).toBe(1000);
+
+    // Move the $250 income from account one to account two.
+    const updateResponse = await agent
+      .put(`/api/transactions/${transactionResponse.body.id}`)
+      .send({
+        accountId: accountTwo.id,
+        categoryId: null,
+        description: "Moved Income",
+        amount: 250,
+        transactionType: "income",
+        transactionDate: "2026-08-20",
+      });
+
+    expect(updateResponse.status).toBe(200);
+
+    const accountOneAfterMove = await agent.get(
+      `/api/accounts/${accountOne.id}`,
+    );
+
+    const accountTwoAfterMove = await agent.get(
+      `/api/accounts/${accountTwo.id}`,
+    );
+
+    expect(Number(accountOneAfterMove.body.starting_balance)).toBe(1000);
+    expect(Number(accountOneAfterMove.body.balance)).toBe(1000);
+
+    expect(Number(accountTwoAfterMove.body.starting_balance)).toBe(1000);
+    expect(Number(accountTwoAfterMove.body.balance)).toBe(1250);
   });
 
   it("should reject a transaction with an amount of zero", async () => {

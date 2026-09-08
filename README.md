@@ -48,7 +48,6 @@ FinTrack uses a full-stack JavaScript architecture with PostgreSQL for persisten
 - **Express.js** — REST API and server routing
 - **PostgreSQL** — Relational database for application and financial data
 - **node-postgres (pg)** — PostgreSQL integration for Node.js
-- **bcrypt** — Password hashing
 - **JSON Web Tokens (JWT)** — Authentication and session verification
 - **HTTP-only cookies** — Storage and transmission of authentication tokens
 
@@ -178,7 +177,19 @@ Users represent authenticated FinTrack accounts. User-owned financial resources 
 
 ### Accounts
 
+### Accounts
+
 Accounts represent financial accounts such as checking, savings, credit, and cash accounts.
+
+Each account belongs to a user and maintains both a starting balance and a current balance.
+
+The starting balance represents the account value entered by the user when the account is created or edited. The current balance reflects the starting balance plus the cumulative effect of income and expense transactions.
+
+When a transaction is created, updated, moved between accounts, or deleted, the backend automatically adjusts the affected account balance. These operations use PostgreSQL transactions so the transaction record and account balance remain synchronized.
+
+Editing an account's starting balance adjusts the current balance by the difference between the old and new starting balance while preserving the effect of existing transactions.
+
+Current balances are stored directly on account records rather than recalculated from the complete transaction history on every request, allowing balance retrieval and dashboard calculations to remain efficient as transaction history grows.
 
 Each account belongs to a user.
 
@@ -252,17 +263,17 @@ FinTrack includes backend integration and API tests using Vitest and Supertest.
 
 Tests run against a dedicated PostgreSQL test database (`fintrack_test`) so automated testing remains isolated from development data.
 
-The test suite currently contains **50 automated tests**:
+The test suite currently contains **56 automated tests**:
 
 | Area | Tests |
 |---|---:|
 | Health / Infrastructure | 2 |
-| Authentication | 9 |
-| Accounts | 9 |
-| Transactions | 11 |
+| Authentication | 8 |
+| Accounts | 10 |
+| Transactions | 17 |
 | Budgets | 9 |
 | Investments | 10 |
-| **Total** | **50** |
+| **Total** | **56** |
 
 ### Test Coverage Areas
 
@@ -272,14 +283,18 @@ The automated test suite verifies behaviors including:
 - Returning Google user authentication
 - Google account linking by verified email
 - Authentication cookie handling
-- Authentication cookie handling
 - Protected API endpoints
 - User-level data isolation
 - Account creation and validation
 - Account authorization
 - Account soft deletion
+- Account starting-balance and current-balance synchronization
 - Transaction authorization
 - Transaction amount, type, and date validation
+- Income and expense effects on account balances
+- Balance reversal when transactions are deleted
+- Balance recalculation when transaction amounts or types are updated
+- Balance synchronization when transactions are moved between accounts
 - Prevention of transactions against unauthorized accounts
 - Preservation of transactions from archived accounts
 - Budget validation and duplicate prevention
