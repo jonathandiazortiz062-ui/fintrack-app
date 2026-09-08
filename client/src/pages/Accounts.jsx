@@ -87,7 +87,7 @@ function Accounts() {
     setFormData({
       name: account.name,
       accountType: account.account_type,
-      balance: account.balance,
+      balance: account.starting_balance,
     });
 
     setFormErrors({
