@@ -82,9 +82,10 @@ export const createAccount = async (req, res) => {
         user_id,
         name,
         account_type,
+        starting_balance,
         balance
       )
-      VALUES ($1, $2, $3, $4)
+      VALUES ($1, $2, $3, $4, $4)
       RETURNING *`,
       [userId, name, accountType, balance ?? 0],
     );
@@ -103,7 +104,6 @@ export const updateAccount = async (req, res) => {
   try {
     const accountId = req.params.id;
     const userId = req.user.id;
-
     const { name, accountType, balance } = req.body;
 
     if (!name || !accountType) {
@@ -119,23 +119,33 @@ export const updateAccount = async (req, res) => {
         message: "Invalid account type",
       });
     }
+
     if (balance !== undefined && Number.isNaN(Number(balance))) {
       return res.status(400).json({
         message: "Balance must be a valid number",
       });
     }
 
+    const newStartingBalance = Number(balance ?? 0);
+
     const result = await pool.query(
       `UPDATE accounts
        SET
          name = $1,
          account_type = $2,
-         balance = $3
+         balance = balance + ($3 - starting_balance),
+         starting_balance = $3
        WHERE id = $4
        AND user_id = $5
        AND deleted_at IS NULL
        RETURNING *`,
-      [name, accountType, balance ?? 0, accountId, userId],
+      [
+        name,
+        accountType,
+        newStartingBalance,
+        accountId,
+        userId,
+      ],
     );
 
     if (result.rows.length === 0) {

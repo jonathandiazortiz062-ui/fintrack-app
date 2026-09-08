@@ -7,8 +7,9 @@ export const getDashboardSummary = async (req, res) => {
 
     const balanceResult = await pool.query(
       `SELECT COALESCE(SUM(balance), 0) AS total_balance
-       FROM accounts
-       WHERE user_id = $1`,
+        FROM accounts
+        WHERE user_id = $1
+        AND deleted_at IS NULL`,
       [userId],
     );
 
@@ -71,7 +72,7 @@ export const getDashboardSummary = async (req, res) => {
       totalBalance: balanceResult.rows[0].total_balance,
       monthlyIncome: incomeResult.rows[0].monthly_income,
       monthlyExpenses: expenseResult.rows[0].monthly_expenses,
-      totalInvestmentValue
+      totalInvestmentValue,
     });
   } catch (error) {
     console.error("Error fetching dashboard summary:", error);
