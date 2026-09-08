@@ -1,4 +1,4 @@
-import { Box, Button, Container, Paper, Typography } from "@mui/material";
+import { Box, Button, Container, Paper, useMediaQuery, Typography } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../utils/api.js";
@@ -9,6 +9,7 @@ function Login() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const isSmallScreen = useMediaQuery("(max-width:400px)");
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -184,6 +185,7 @@ function Login() {
               sx={{
                 display: "flex",
                 justifyContent: "center",
+                width: "100%",
               }}
             >
               <GoogleLogin
@@ -193,7 +195,7 @@ function Login() {
                 text="continue_with"
                 shape="rectangular"
                 size="large"
-                width="280"
+                width={isSmallScreen ? "220" : "280"}
               />
             </Box>
 
