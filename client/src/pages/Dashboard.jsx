@@ -6,7 +6,6 @@ import {
   ArrowDownward,
   ArrowUpward,
   ReceiptLong,
-  TrendingUp,
 } from "@mui/icons-material";
 
 function Dashboard() {
@@ -262,34 +261,6 @@ function Dashboard() {
 
               <Typography variant="body2" color="text.secondary">
                 Expenses this month
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={summaryCardStyles}>
-            <CardContent sx={{ p: 3 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  mb: 3,
-                }}
-              >
-                <Box
-                  sx={{
-                    ...iconBoxStyles,
-                    backgroundColor: "primary.50",
-                    color: "primary.main",
-                  }}
-                >
-                  <TrendingUp />
-                </Box>
-              </Box>
-              <Typography variant="body2" color="text.secondary">
-                Current portfolio value
               </Typography>
             </CardContent>
           </Card>
