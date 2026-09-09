@@ -1,5 +1,4 @@
 import pool from "../db/db.js";
-import { fetchStockQuote } from "../services/marketService.js";
 
 export const getDashboardSummary = async (req, res) => {
   try {
@@ -37,42 +36,11 @@ export const getDashboardSummary = async (req, res) => {
       [userId],
     );
 
-    const investmentResult = await pool.query(
-      `SELECT
-        symbol,
-        quantity
-      FROM investments
-      WHERE user_id = $1`,
-      [userId],
-    );
-
-    const investmentValues = await Promise.all(
-      investmentResult.rows.map(async (investment) => {
-        try {
-          const quote = await fetchStockQuote(investment.symbol);
-
-          return Number(investment.quantity) * Number(quote.price);
-        } catch (error) {
-          console.error(
-            `Unable to retrieve dashboard market data for ${investment.symbol}:`,
-            error,
-          );
-
-          return 0;
-        }
-      }),
-    );
-
-    const totalInvestmentValue = investmentValues.reduce(
-      (total, value) => total + value,
-      0,
-    );
 
     res.json({
       totalBalance: balanceResult.rows[0].total_balance,
       monthlyIncome: incomeResult.rows[0].monthly_income,
       monthlyExpenses: expenseResult.rows[0].monthly_expenses,
-      totalInvestmentValue,
     });
   } catch (error) {
     console.error("Error fetching dashboard summary:", error);

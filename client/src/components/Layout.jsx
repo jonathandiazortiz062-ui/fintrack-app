@@ -16,7 +16,6 @@ import {
   AccountBalanceWallet,
   ReceiptLong,
   Savings,
-  TrendingUp,
 } from "@mui/icons-material";
 
 import MenuIcon from "@mui/icons-material/Menu";
@@ -156,25 +155,6 @@ function Layout() {
             }}
           />
         </ListItemButton>
-
-        <ListItemButton
-          component={Link}
-          to="/investments"
-          sx={navItemStyles("/investments")}
-          onClick={() => setMobileOpen(false)}
-        >
-          <ListItemIcon sx={{ minWidth: 40 }}>
-            <TrendingUp />
-          </ListItemIcon>
-
-          <ListItemText
-            primary="Investments"
-            primaryTypographyProps={{
-              fontWeight: 600,
-            }}
-          />
-        </ListItemButton>
-
         <ListItemButton
           onClick={async () => {
             setMobileOpen(false);

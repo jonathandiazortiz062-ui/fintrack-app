@@ -25,10 +25,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useState, useEffect } from "react";
 
-//We are using the same layout for all of our pages, so we can just copy and paste the code from the Budgets page and change the text to match the Investments page. However,
-// we will create reusable components for the cards, buttons, and other UI elements so that we can use them on other pages as well.
-// This will make our code more maintainable and easier to read.
-
 function Accounts() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -6,7 +6,6 @@
 -- schema can be recreated cleanly.
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS budgets;
-DROP TABLE IF EXISTS investments;
 DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS users;
@@ -101,25 +100,6 @@ CREATE TABLE budgets (
   CONSTRAINT unique_user_category_budget
     UNIQUE (user_id, category_id)
 );
-
-
--- =========================================
--- Investments
--- =========================================
-
-CREATE TABLE investments (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER NOT NULL,
-  symbol VARCHAR(20) NOT NULL,
-  quantity NUMERIC(18, 8) NOT NULL,
-  purchase_price NUMERIC(12, 2) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-  CONSTRAINT fk_investments_user
-    FOREIGN KEY (user_id)
-    REFERENCES users(id)
-);
-
 
 -- =========================================
 -- Seed Global Categories

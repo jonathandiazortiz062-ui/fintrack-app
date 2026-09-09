@@ -14,7 +14,6 @@ function Dashboard() {
     totalBalance: 0,
     monthlyIncome: 0,
     monthlyExpenses: 0,
-    totalInvestmentValue: 0,
   });
 
   const [loading, setLoading] = useState(true);
@@ -288,39 +287,7 @@ function Dashboard() {
                 >
                   <TrendingUp />
                 </Box>
-
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Total Investments
-                </Typography>
               </Box>
-              {summary.totalInvestmentValue < 0 ? (
-                <Typography
-                  variant="h5"
-                  sx={{
-                    color: "error.main",
-                    fontWeight: 700,
-                    mb: 0.5,
-                  }}
-                >
-                  ${Number(summary.totalInvestmentValue).toFixed(2)}
-                </Typography>
-              ) : (
-                <Typography
-                  variant="h5"
-                  sx={{
-                    color: "success.main",
-                    fontWeight: 700,
-                    mb: 0.5,
-                  }}
-                >
-                  ${Number(summary.totalInvestmentValue).toFixed(2)}
-                </Typography>
-              )}
-
               <Typography variant="body2" color="text.secondary">
                 Current portfolio value
               </Typography>

@@ -7,8 +7,6 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
-import investmentRoutes from "./routes/investmentRoutes.js";
-import marketRoutes from "./routes/marketRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
 import cookieParser from "cookie-parser";
@@ -32,8 +30,6 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/investments", investmentRoutes);
-app.use("/api/market", marketRoutes);
 app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {

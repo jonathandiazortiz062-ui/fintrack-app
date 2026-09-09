@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import SavingsIcon from "@mui/icons-material/Savings";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import InsightsIcon from "@mui/icons-material/Insights";
@@ -157,8 +156,7 @@ function Home() {
                 maxWidth: "600px",
               }}
             >
-              Manage your accounts, track income and expenses, build budgets,
-              and monitor your investments from one simple dashboard.
+              Manage your accounts, track income and expenses and build budgets from one simple dashboard.
             </Typography>
 
             <Box
@@ -363,12 +361,6 @@ function Home() {
                   "Set monthly spending limits and monitor your progress throughout the month.",
                 icon: <SavingsIcon fontSize="large" />,
               },
-              {
-                title: "Investments",
-                description:
-                  "Track your investment holdings and monitor current market information.",
-                icon: <TrendingUpIcon fontSize="large" />,
-              },
             ].map((feature) => (
               <Box
                 key={feature.title}
@@ -473,14 +465,14 @@ function Home() {
                 number: "02",
                 title: "Add Your Financial Data",
                 description:
-                  "Add your accounts, record transactions, create budgets, and enter your investment holdings.",
+                  "Add your accounts, record transactions and create budgets.",
                 icon: <AddCardIcon fontSize="large" />,
               },
               {
                 number: "03",
                 title: "Monitor Your Finances",
                 description:
-                  "Use your dashboard to see balances, monthly income and expenses, investments, and recent activity.",
+                  "Use your dashboard to see balances, monthly income or expenses and recent activity.",
                 icon: <InsightsIcon fontSize="large" />,
               },
             ].map((step) => (
@@ -572,7 +564,7 @@ function Home() {
             }}
           >
             Create your FinTrack account and begin organizing your accounts,
-            transactions, budgets, and investments in one place.
+            transactions and budgets in one place.
           </Typography>
 
           <Box

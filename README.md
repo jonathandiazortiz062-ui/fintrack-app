@@ -2,7 +2,7 @@
 
 FinTrack is a full-stack personal finance management application designed to help users organize and monitor their financial activity from a single platform.
 
-The application allows users to manage financial accounts, record and categorize transactions, establish monthly budgets, and track investment holdings using current market data. A centralized dashboard provides an overview of account balances, monthly income and expenses, investment value, and recent financial activity.
+The application allows users to manage financial accounts, record and categorize transactions, and establish monthly budgets. A centralized dashboard provides an overview of account balances, monthly income and expenses, and recent financial activity.
 
 FinTrack was built as a full-stack portfolio project with an emphasis on secure authentication, multi-user data isolation, RESTful API design, relational database modeling, backend validation, financial data integrity, and automated API testing.
 
@@ -16,8 +16,6 @@ FinTrack was built as a full-stack portfolio project with an emphasis on secure 
 - Transaction categorization and filtering
 - Monthly category-based budgeting
 - Current-month budget spending calculations
-- Investment portfolio tracking
-- External stock market data integration
 - Dashboard with financial summaries and recent transactions
 - Account soft deletion that preserves financial history
 - User-level data isolation across financial resources
@@ -51,11 +49,6 @@ FinTrack uses a full-stack JavaScript architecture with PostgreSQL for persisten
 - **JSON Web Tokens (JWT)** — Authentication and session verification
 - **HTTP-only cookies** — Storage and transmission of authentication tokens
 
-### External Services
-
-- **Alpha Vantage API** — Stock market data used to calculate current investment values and portfolio performance
-- **In-memory caching** — Reduces unnecessary external market-data requests and helps manage API usage limits
-
 ### Testing
 
 - **Vitest** — Automated backend test runner
@@ -66,7 +59,7 @@ FinTrack uses a full-stack JavaScript architecture with PostgreSQL for persisten
 
 ## Application Architecture
 
-FinTrack follows a client-server architecture in which the React frontend communicates with an Express REST API. The backend handles authentication, authorization, validation, business logic, database access, and external market-data integration.
+FinTrack follows a client-server architecture in which the React frontend communicates with an Express REST API. The backend handles authentication, authorization, validation, business logic, and database access.
 
 ```text
 ┌──────────────────────────────┐
@@ -86,19 +79,17 @@ FinTrack follows a client-server architecture in which the React frontend commun
 │ Validation                   │
 └──────────────┬───────────────┘
                │
-         ┌─────┴─────────┐
-         │               │
-         ▼               ▼
-┌───────────────┐  ┌─────────────────┐
-│  PostgreSQL   │  │  Market Service │
-│               │  │  + Quote Cache  │
-│ Users         │  └────────┬────────┘
-│ Accounts      │           │
-│ Transactions  │           ▼
-│ Budgets       │  ┌─────────────────┐
-│ Categories    │  │  Alpha Vantage  │
-│ Investments   │  │       API       │
-└───────────────┘  └─────────────────┘
+               │
+               ▼
+       ┌───────────────┐
+       │  PostgreSQL   │
+       │               │
+       │ Users         │
+       │ Accounts      │
+       │ Transactions  │
+       │ Budgets       │
+       │ Categories    │
+       └───────────────┘
 ```
 
 The frontend and backend are maintained as separate applications within the repository:
@@ -132,7 +123,7 @@ FinTrack implements authentication and authorization at the backend API layer ra
 
 FinTrack does not store or manage user passwords. Google is responsible for authenticating the user's identity, while FinTrack maintains its own application session and authorization model.
 
-This provides user-level data isolation for financial accounts, transactions, budgets, and investments.
+This provides user-level data isolation for financial accounts, transactions, and budgets.
 
 ### Additional Backend Protections
 
@@ -144,12 +135,9 @@ This provides user-level data isolation for financial accounts, transactions, bu
 - Account ownership verification
 - Transaction ownership verification
 - Budget ownership verification
-- Investment ownership verification
 - Validation of transaction types and account types
 - Prevention of future-dated transactions
 - Validation of financial numeric values
-- External stock-symbol validation
-- Graceful handling of external market-data failures
 
 ---
 
@@ -166,16 +154,12 @@ Users
   │                    │
   │                    └──────── Transactions ─────── Categories
   │
-  ├─────────────── Budgets ───────────────────────── Categories
-  │
-  └─────────────── Investments
+  └─────────────── Budgets ───────────────────────── Categories
 ```
 
 ### Users
 
 Users represent authenticated FinTrack accounts. User-owned financial resources are associated with the authenticated user's database ID.
-
-### Accounts
 
 ### Accounts
 
@@ -219,16 +203,6 @@ Budgets associate a user with a category and a monthly spending limit.
 
 A database uniqueness constraint prevents a user from creating multiple budgets for the same category.
 
-### Investments
-
-Investment records belong directly to users and store:
-
-- Stock symbol
-- Quantity
-- Purchase price
-
-Current market values and gain/loss calculations are derived using market data retrieved from Alpha Vantage.
-
 ---
 
 ## Financial History and Account Soft Deletion
@@ -263,7 +237,7 @@ FinTrack includes backend integration and API tests using Vitest and Supertest.
 
 Tests run against a dedicated PostgreSQL test database (`fintrack_test`) so automated testing remains isolated from development data.
 
-The test suite currently contains **56 automated tests**:
+The test suite currently contains **46 automated tests**:
 
 | Area | Tests |
 |---|---:|
@@ -272,8 +246,7 @@ The test suite currently contains **56 automated tests**:
 | Accounts | 10 |
 | Transactions | 17 |
 | Budgets | 9 |
-| Investments | 10 |
-| **Total** | **56** |
+| **Total** | **46** |
 
 ### Test Coverage Areas
 
@@ -299,12 +272,6 @@ The automated test suite verifies behaviors including:
 - Preservation of transactions from archived accounts
 - Budget validation and duplicate prevention
 - Cross-user budget-spending isolation
-- Investment ownership
-- Investment numeric validation
-- Stock-symbol validation
-- External market-data service failure handling
-
-External market-data requests are mocked during automated testing. This keeps tests deterministic, avoids consuming external API quotas, and prevents network availability from affecting test results.
 
 ### Running Tests
 
@@ -326,7 +293,6 @@ Before running FinTrack locally, make sure you have:
 - npm
 - PostgreSQL
 - Git
-- An Alpha Vantage API key
 
 ### 1. Clone the Repository
 
@@ -383,7 +349,6 @@ DB_USER=your_postgres_user
 DB_PASSWORD=your_postgres_password
 
 JWT_SECRET=your_jwt_secret
-ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key
 GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
 
@@ -403,8 +368,6 @@ DB_PASSWORD=your_postgres_password
 JWT_SECRET=your_test_jwt_secret
 GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
-
-The automated investment tests mock external market-data requests, so they do not require live Alpha Vantage requests.
 
 ### 5. Configure the Frontend
 
@@ -503,7 +466,7 @@ Production secrets and configuration are managed through Vercel and Render envir
 
 ![FinTrack Dashboard](docs/screenshots/dashboard.png)
 
-The dashboard provides a centralized overview of the user's finances, including total account balance, monthly income and expenses, investment value, and recent transaction activity.
+The dashboard provides a centralized overview of the user's finances, including total account balance, monthly income and expenses, and recent transaction activity.
 
 ### Account Management
 
@@ -523,12 +486,6 @@ Transactions can be created, edited, deleted, and filtered by account, category,
 
 Users can create monthly category budgets and monitor current-month spending through dynamically calculated totals and progress indicators.
 
-### Investment Portfolio
-
-![FinTrack Investments](docs/screenshots/investments.png)
-
-The investment portfolio tracks holdings, cost basis, current value, and gain or loss. Current market prices are retrieved through the Alpha Vantage API and cached by the backend to reduce external API requests.
-
 ---
 
 ## Project Status
@@ -539,7 +496,6 @@ FinTrack currently supports the complete core workflow for:
 - Financial account management
 - Transaction tracking
 - Monthly budgeting
-- Investment portfolio tracking
 - Financial dashboard reporting
 - Multi-user authorization
 - Automated backend testing
