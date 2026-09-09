@@ -347,12 +347,8 @@ function Dashboard() {
                   <Typography
                     sx={{
                       fontWeight: 700,
+                      color: transaction.transaction_type === "income" ? "success.main" : "error.main",
                     }}
-                    color={
-                      transaction.transaction_type === "income"
-                        ? "success.main"
-                        : "error.main"
-                    }
                   >
                     {transaction.transaction_type === "income" ? "+" : "-"}$
                     {Number(transaction.amount).toFixed(2)}
