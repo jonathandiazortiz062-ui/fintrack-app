@@ -2,9 +2,9 @@
 
 FinTrack is a full-stack personal finance management application designed to help users organize and monitor their financial activity from a single platform.
 
-The application allows users to manage financial accounts, record and categorize transactions, and establish monthly budgets. A centralized dashboard provides an overview of account balances, monthly income and expenses, and recent financial activity.
+The application allows users to manage financial accounts, record and categorize transactions, establish monthly budgets, and analyze financial activity over customizable time periods. A centralized dashboard provides an overview of account balances, monthly income and expenses, and recent financial activity, while the Analytics workspace provides visual comparisons of income, expenses, spending categories, and current budget performance.
 
-FinTrack was built as a full-stack portfolio project with an emphasis on secure authentication, multi-user data isolation, RESTful API design, relational database modeling, backend validation, financial data integrity, and automated API testing.
+FinTrack was built as a full-stack project with an emphasis on secure authentication, multi-user data isolation, RESTful API design, relational database modeling, backend validation, financial data integrity, and automated API testing.
 
 ---
 
@@ -16,6 +16,11 @@ FinTrack was built as a full-stack portfolio project with an emphasis on secure 
 - Transaction categorization and filtering
 - Monthly category-based budgeting
 - Current-month budget spending calculations
+- Financial analytics with interactive charts
+- Income vs. expense analysis across selectable time ranges
+- Expense analysis by transaction category
+- Current-month budget vs. actual spending comparison
+- Preset and custom date-range filtering
 - Dashboard with financial summaries and recent transactions
 - Account soft deletion that preserves financial history
 - User-level data isolation across financial resources
@@ -36,6 +41,7 @@ FinTrack uses a full-stack JavaScript architecture with PostgreSQL for persisten
 - **React** — Component-based user interface
 - **Vite** — Frontend development and build tooling
 - **Material UI (MUI)** — Responsive UI components and styling
+- **Recharts** — Responsive financial data visualization and analytics charts
 - **JavaScript (ES6+)** — Frontend application logic
 - **Fetch API** — Communication with the backend REST API
 
@@ -246,7 +252,8 @@ The test suite currently contains **46 automated tests**:
 | Accounts | 10 |
 | Transactions | 17 |
 | Budgets | 9 |
-| **Total** | **46** |
+| Analytics | 6 |
+| **Total** | **52** |
 
 ### Test Coverage Areas
 
@@ -272,6 +279,10 @@ The automated test suite verifies behaviors including:
 - Preservation of transactions from archived accounts
 - Budget validation and duplicate prevention
 - Cross-user budget-spending isolation
+- Monthly income and expense analytics aggregation
+- Analytics date-range filtering
+- Expense aggregation by transaction category
+- Analytics user-level data isolation
 
 ### Running Tests
 
@@ -486,6 +497,16 @@ Transactions can be created, edited, deleted, and filtered by account, category,
 
 Users can create monthly category budgets and monitor current-month spending through dynamically calculated totals and progress indicators.
 
+### Financial Analytics
+
+![FinTrack Analytics](docs/screenshots/analytics.png)
+![FinTrack Analytics](docs/screenshots/analytics2.png)
+![FinTrack Analytics](docs/screenshots/analytics3.png)
+
+The Analytics workspace provides interactive financial visualizations for comparing monthly income and expenses, analyzing spending by category, and evaluating current-month spending against category budget limits. Preset and custom date ranges can be used to explore historical transaction activity.
+
+Budget vs. actual comparisons reflect the current month because FinTrack's budget model stores current monthly category limits rather than historical budget versions.
+
 ---
 
 ## Project Status
@@ -497,6 +518,7 @@ FinTrack currently supports the complete core workflow for:
 - Transaction tracking
 - Monthly budgeting
 - Financial dashboard reporting
+- Financial analytics and data visualization
 - Multi-user authorization
 - Automated backend testing
 

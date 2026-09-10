@@ -1,16 +1,14 @@
 Things you need to add or fix after first deployement:
 
-1.) Add graphs of expenses and incomes example (monthly income vs. expense) (month to month expense by category), etc.
-
-2.) An area where you can create a sheet that allows you to write 
+1.) An area where you can create a sheet that allows you to write 
 what your monthly fincacial responsabilities are like the google sheet you have.
 
-3.) Add a way to keep trak of your 401K AND IRA accounts.
+2.) Add a way to keep trak of your 401K AND IRA accounts.
 
-4.) Add functionality to upload pdf and create transactions based on pdf read.
+3.) Add functionality to upload pdf and create transactions based on pdf read.
 
-5.) Add a {oops we are having some issues} page.
+4.) Add a {oops we are having some issues} page.
 
-6.) Add monthly balance history can be a later enhancement rather than something we need to build now.
+5.) Add monthly balance history can be a later enhancement rather than something we need to build now.
 
-7.) Fix the Home page in mobile so that the Getstarted button isn't cut out.
+6.) Fix the Home page in mobile so that the Getstarted button isn't cut out.
