@@ -9,6 +9,7 @@ import Transactions from './pages/Transactions.jsx';
 import Budgets from './pages/Budgets.jsx';
 import Login from './pages/Login.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import Analytics from './pages/Analytics.jsx';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/budgets" element={<Budgets />} />
+          <Route path="/analytics" element={<Analytics />} />
         </Route>
       </Route>
 

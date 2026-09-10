@@ -16,6 +16,7 @@ import {
   AccountBalanceWallet,
   ReceiptLong,
   Savings,
+  Analytics as AnalyticsIcon,
 } from "@mui/icons-material";
 
 import MenuIcon from "@mui/icons-material/Menu";
@@ -150,6 +151,23 @@ function Layout() {
 
           <ListItemText
             primary="Budgets"
+            primaryTypographyProps={{
+              fontWeight: 600,
+            }}
+          />
+        </ListItemButton>
+        <ListItemButton
+          component={Link}
+          to="/analytics"
+          sx={navItemStyles("/analytics")}
+          onClick={() => setMobileOpen(false)}
+        >
+          <ListItemIcon sx={{ minWidth: 40 }}>
+            <AnalyticsIcon />
+          </ListItemIcon>
+
+          <ListItemText
+            primary="Analytics"
             primaryTypographyProps={{
               fontWeight: 600,
             }}
