@@ -12,3 +12,7 @@ what your monthly fincacial responsabilities are like the google sheet you have.
 5.) Add monthly balance history can be a later enhancement rather than something we need to build now.
 
 6.) Fix the Home page in mobile so that the Getstarted button isn't cut out.
+
+7.) Implement bar component in dashboard that works as a banner that shows important KPI, BUDGETS REACHING THEIR LIMITS, goals being acchived (saving goals)
+
+8.) Add a financial goals section. They could be paying up a debt, saving money for trip, etc.
