@@ -30,8 +30,13 @@ function Home() {
           sx={{
             maxWidth: "1200px",
             width: "100%",
+            boxSizing: "border-box",
             mx: "auto",
             py: 1,
+            px: {
+              xs: 1.5,
+              sm: 3,
+            },
           }}
         >
           <Box
@@ -46,8 +51,14 @@ function Home() {
           >
             <Box
               sx={{
-                width: 36,
-                height: 36,
+                width: {
+                  xs: 32,
+                  sm: 36,
+                },
+                height: {
+                  xs: 32,
+                  sm: 36,
+                },
                 borderRadius: 2,
                 backgroundColor: "primary.main",
                 color: "primary.contrastText",
@@ -65,6 +76,11 @@ function Home() {
               component="div"
               sx={{
                 fontWeight: 700,
+                fontSize: {
+                  xs: "1.25rem",
+                  sm: "1.5rem",
+                },
+                whiteSpace: "nowrap",
               }}
             >
               FinTrack
@@ -75,7 +91,16 @@ function Home() {
             color="inherit"
             onClick={() => navigate("/login")}
             sx={{
-              mr: 1,
+              mr: {
+                xs: 0.25,
+                sm: 1,
+              },
+              px: {
+                xs: 1,
+                sm: 1.5,
+              },
+              minWidth: "auto",
+              whiteSpace: "nowrap",
               textTransform: "none",
               fontWeight: 600,
             }}
@@ -89,7 +114,15 @@ function Home() {
             sx={{
               textTransform: "none",
               fontWeight: 600,
-              px: 2.5,
+              whiteSpace: "nowrap",
+              px: {
+                xs: 1.25,
+                sm: 2.5,
+              },
+              fontSize: {
+                xs: "0.8rem",
+                sm: "0.875rem",
+              },
             }}
           >
             Get Started
@@ -156,7 +189,8 @@ function Home() {
                 maxWidth: "600px",
               }}
             >
-              Manage your accounts, track income and expenses and build budgets from one simple dashboard.
+              Manage your accounts, track income and expenses and build budgets
+              from one simple dashboard.
             </Typography>
 
             <Box
@@ -608,7 +642,6 @@ function Home() {
           </Box>
         </Box>
       </Box>
-
       <Box
         component="footer"
         sx={{
