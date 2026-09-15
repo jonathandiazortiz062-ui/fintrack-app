@@ -2,7 +2,7 @@
 
 FinTrack is a full-stack personal finance management application designed to help users organize and monitor their financial activity from a single platform.
 
-The application allows users to manage financial accounts, record and categorize transactions, establish monthly budgets, and analyze financial activity over customizable time periods. A centralized dashboard provides an overview of account balances, monthly income and expenses, and recent financial activity, while the Analytics workspace provides visual comparisons of income, expenses, spending categories, and current budget performance.
+The application allows users to manage financial accounts, record and categorize transactions, establish monthly budgets, plan recurring monthly financial obligations, and analyze financial activity over customizable time periods. A centralized dashboard provides an overview of account balances, monthly income and expenses, and recent financial activity, while the Monthly Checklist provides a forward-looking view of upcoming income and expense obligations and the Analytics workspace provides visual comparisons of income, expenses, spending categories, and current budget performance.
 
 FinTrack was built as a full-stack project with an emphasis on secure authentication, multi-user data isolation, RESTful API design, relational database modeling, backend validation, financial data integrity, and automated API testing.
 
@@ -87,15 +87,16 @@ FinTrack follows a client-server architecture in which the React frontend commun
                │
                │
                ▼
-       ┌───────────────┐
-       │  PostgreSQL   │
-       │               │
-       │ Users         │
-       │ Accounts      │
-       │ Transactions  │
-       │ Budgets       │
-       │ Categories    │
-       └───────────────┘
+       ┌───────────────────────┐
+       │      PostgreSQL       │
+       │                       │
+       │ Users                 │
+       │ Accounts              │
+       │ Transactions          │
+       │ Budgets               │
+       │ Monthly Obligations   │
+       │ Categories            │
+       └───────────────────────┘
 ```
 
 The frontend and backend are maintained as separate applications within the repository:
@@ -129,7 +130,7 @@ FinTrack implements authentication and authorization at the backend API layer ra
 
 FinTrack does not store or manage user passwords. Google is responsible for authenticating the user's identity, while FinTrack maintains its own application session and authorization model.
 
-This provides user-level data isolation for financial accounts, transactions, and budgets.
+This provides user-level data isolation for financial accounts, transactions, budgets, and monthly obligations.
 
 ### Additional Backend Protections
 
@@ -141,6 +142,7 @@ This provides user-level data isolation for financial accounts, transactions, an
 - Account ownership verification
 - Transaction ownership verification
 - Budget ownership verification
+- Monthly obligation ownership verification
 - Validation of transaction types and account types
 - Prevention of future-dated transactions
 - Validation of financial numeric values
@@ -158,7 +160,9 @@ Users
   │
   ├─────────────── Accounts
   │                    │
-  │                    └──────── Transactions ─────── Categories
+  │                    ├──────── Transactions ─────── Categories
+  │                    │
+  │                    └──────── Monthly Obligations ─ Categories
   │
   └─────────────── Budgets ───────────────────────── Categories
 ```
@@ -209,6 +213,19 @@ Budgets associate a user with a category and a monthly spending limit.
 
 A database uniqueness constraint prevents a user from creating multiple budgets for the same category.
 
+### Monthly Obligations
+
+Monthly obligations represent planned income and expense items that a user expects to handle during the current or following month.
+
+Each obligation belongs to a user and financial account and may optionally reference a transaction category. Obligations contain a name, amount, transaction type, due date, and completion status.
+
+The Monthly Checklist intentionally remains separate from transaction history. Marking an obligation as completed records that the planned financial responsibility has been handled, but it does not automatically create a transaction or modify an account balance.
+
+FinTrack displays obligations for the current and next month while preserving older obligation records in PostgreSQL. Users can create, edit, complete, reopen, and delete individual obligations.
+
+When the next month is empty, the user can explicitly copy the current month's obligations into the next month. Copied obligations are independent database records, allowing future amounts, dates, categories, or accounts to be modified without changing the previous month. Completion status is reset when obligations are copied so the new month begins with an unchecked checklist.
+
+When a due-date day does not exist in the destination month, FinTrack adjusts it to the final valid day of that month. For example, an obligation due January 31 is copied to February 28 or 29 as appropriate.
 ---
 
 ## Financial History and Account Soft Deletion
@@ -243,7 +260,7 @@ FinTrack includes backend integration and API tests using Vitest and Supertest.
 
 Tests run against a dedicated PostgreSQL test database (`fintrack_test`) so automated testing remains isolated from development data.
 
-The test suite currently contains **46 automated tests**:
+The test suite currently contains **75 automated tests**:
 
 | Area | Tests |
 |---|---:|
@@ -253,7 +270,8 @@ The test suite currently contains **46 automated tests**:
 | Transactions | 17 |
 | Budgets | 9 |
 | Analytics | 6 |
-| **Total** | **52** |
+| Monthly Obligations | 23 |
+| **Total** | **75** |
 
 ### Test Coverage Areas
 
@@ -283,6 +301,15 @@ The automated test suite verifies behaviors including:
 - Analytics date-range filtering
 - Expense aggregation by transaction category
 - Analytics user-level data isolation
+- Monthly obligation creation and validation
+- Current and next-month obligation retrieval
+- Monthly obligation ownership and cross-user isolation
+- Monthly obligation editing and deletion
+- Completion and reopening of monthly obligations
+- Current-to-next-month obligation copying
+- Completion-state reset during month copying
+- Prevention of duplicate next-month copying
+- Due-date adjustment for shorter destination months
 
 ### Running Tests
 
@@ -497,6 +524,14 @@ Transactions can be created, edited, deleted, and filtered by account, category,
 
 Users can create monthly category budgets and monitor current-month spending through dynamically calculated totals and progress indicators.
 
+### Monthly Checklist
+
+![FinTrack MonthlyChecklist](docs/screenshots/monthlyChecklist.png)
+
+Users can plan expected income and expense obligations for the current and next month, mark obligations as completed, and independently edit or delete planned items.
+
+When the next month is empty, the current month's checklist can be copied forward as a starting point. Copied obligations begin incomplete and remain independent from the original month's records.
+
 ### Financial Analytics
 
 ![FinTrack Analytics](docs/screenshots/analytics.png)
@@ -517,6 +552,7 @@ FinTrack currently supports the complete core workflow for:
 - Financial account management
 - Transaction tracking
 - Monthly budgeting
+- Monthly financial obligation planning and completion tracking
 - Financial dashboard reporting
 - Financial analytics and data visualization
 - Multi-user authorization
