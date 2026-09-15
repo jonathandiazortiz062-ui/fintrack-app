@@ -101,6 +101,43 @@ CREATE TABLE budgets (
     UNIQUE (user_id, category_id)
 );
 
+
+-- =========================================
+-- Monthly Obligations
+-- =========================================
+
+CREATE TABLE monthly_obligations (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  account_id INTEGER NOT NULL,
+  category_id INTEGER NULL,
+  name VARCHAR(255) NOT NULL,
+  amount NUMERIC(12, 2) NOT NULL,
+  transaction_type VARCHAR(20) NOT NULL,
+  due_date DATE NOT NULL,
+  is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+  completed_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_monthly_obligations_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id),
+
+  CONSTRAINT fk_monthly_obligations_account
+    FOREIGN KEY (account_id)
+    REFERENCES accounts(id),
+
+  CONSTRAINT fk_monthly_obligations_category
+    FOREIGN KEY (category_id)
+    REFERENCES categories(id),
+
+  CONSTRAINT valid_monthly_obligation_type
+    CHECK (transaction_type IN ('income', 'expense')),
+
+  CONSTRAINT positive_monthly_obligation_amount
+    CHECK (amount > 0)
+);
+
 -- =========================================
 -- Seed Global Categories
 -- =========================================

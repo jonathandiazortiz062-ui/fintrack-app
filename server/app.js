@@ -9,6 +9,7 @@ import budgetRoutes from "./routes/budgetRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import monthlyObligationRoutes from "./routes/monthlyObligationRoutes.js";
 
 import cookieParser from "cookie-parser";
 
@@ -33,6 +34,7 @@ app.use("/api/budgets", budgetRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/monthly-obligations", monthlyObligationRoutes);
 
 app.get("/", (req, res) => {
   res.send("FinTrack API is running");
