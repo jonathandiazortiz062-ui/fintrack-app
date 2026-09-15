@@ -10,6 +10,7 @@ import Budgets from './pages/Budgets.jsx';
 import Login from './pages/Login.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Analytics from './pages/Analytics.jsx';
+import MonthlyChecklist from './pages/MonthlyChecklist.jsx';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/budgets" element={<Budgets />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/monthly-checklist" element={<MonthlyChecklist />} />
         </Route>
       </Route>
 

@@ -16,6 +16,7 @@ import {
   AccountBalanceWallet,
   ReceiptLong,
   Savings,
+  Checklist,
   Analytics as AnalyticsIcon,
 } from "@mui/icons-material";
 
@@ -151,6 +152,23 @@ function Layout() {
 
           <ListItemText
             primary="Budgets"
+            primaryTypographyProps={{
+              fontWeight: 600,
+            }}
+          />
+        </ListItemButton>
+        <ListItemButton
+          component={Link}
+          to="/monthly-checklist"
+          sx={navItemStyles("/monthly-checklist")}
+          onClick={() => setMobileOpen(false)}
+        >
+          <ListItemIcon sx={{ minWidth: 40 }}>
+            <Checklist />
+          </ListItemIcon>
+
+          <ListItemText
+            primary="Monthly Checklist"
             primaryTypographyProps={{
               fontWeight: 600,
             }}
