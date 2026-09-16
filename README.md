@@ -139,6 +139,7 @@ This provides user-level data isolation for financial accounts, transactions, bu
 - Email normalization
 - Google ID token verification
 - Verified Google email validation
+- Authentication endpoint rate limiting
 - Account ownership verification
 - Transaction ownership verification
 - Budget ownership verification
@@ -260,18 +261,18 @@ FinTrack includes backend integration and API tests using Vitest and Supertest.
 
 Tests run against a dedicated PostgreSQL test database (`fintrack_test`) so automated testing remains isolated from development data.
 
-The test suite currently contains **75 automated tests**:
+The test suite currently contains **76 automated tests**:
 
 | Area | Tests |
 |---|---:|
 | Health / Infrastructure | 2 |
-| Authentication | 8 |
+| Authentication | 9 |
 | Accounts | 10 |
 | Transactions | 17 |
 | Budgets | 9 |
 | Analytics | 6 |
 | Monthly Obligations | 23 |
-| **Total** | **75** |
+| **Total** | **76** |
 
 ### Test Coverage Areas
 
@@ -281,6 +282,7 @@ The automated test suite verifies behaviors including:
 - Returning Google user authentication
 - Google account linking by verified email
 - Authentication cookie handling
+- Google authentication rate-limit enforcement
 - Protected API endpoints
 - User-level data isolation
 - Account creation and validation
