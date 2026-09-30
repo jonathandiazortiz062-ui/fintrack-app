@@ -317,6 +317,7 @@ function Home() {
                   py: 1.5,
                   borderBottom: 1,
                   borderColor: "divider",
+                  color: amount.startsWith("+") ? "success.main" : "error.main",
                 }}
               >
                 <Typography>{name}</Typography>
